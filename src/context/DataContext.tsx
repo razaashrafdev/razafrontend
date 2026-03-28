@@ -48,10 +48,6 @@ export interface Education {
   visible?: boolean;
 }
 
-export interface SiteSettings {
-  logoText: string;
-}
-
 interface DataContextType {
   projects: Project[];
   setProjects: (p: Project[]) => void;
@@ -63,8 +59,6 @@ interface DataContextType {
   setPricing: (p: PricingPackage[]) => void;
   education: Education[];
   setEducation: (e: Education[]) => void;
-  siteSettings: SiteSettings;
-  setSiteSettings: (s: SiteSettings) => void;
 }
 
 const DataContext = createContext<DataContextType | null>(null);
@@ -79,9 +73,45 @@ const defaultProjects: Project[] = [
 ];
 
 const defaultServices: Service[] = [
-  { id: "1", title: "Web Development", description: "Modern, responsive web applications built with cutting-edge technologies and best practices.", icon: "Code" },
-  { id: "2", title: "App Development", description: "Cross-platform mobile applications with native performance and beautiful user interfaces.", icon: "Smartphone" },
-  { id: "3", title: "CMS Development", description: "Custom content management solutions that are easy to use, scalable, and tailored to your needs.", icon: "Layout" },
+  {
+    id: "1",
+    title: "Web Development",
+    description:
+      "Modern, responsive web applications built with cutting-edge technologies. From landing pages to complex web apps, I deliver solutions that are fast, accessible, and scalable.",
+    icon: "Code",
+  },
+  {
+    id: "2",
+    title: "App Development",
+    description:
+      "Cross-platform mobile applications with native performance. Beautiful user interfaces with smooth interactions that work seamlessly on iOS and Android.",
+    icon: "Smartphone",
+  },
+  {
+    id: "3",
+    title: "CMS Development",
+    description:
+      "Custom content management solutions tailored to your workflow. Easy-to-use admin panels, flexible content models, and seamless publishing experiences.",
+    icon: "Layout",
+  },
+  {
+    id: "4",
+    title: "API Integration",
+    description: "Connect REST, GraphQL, and third-party APIs with secure auth, error handling, and clear documentation so your services work together reliably.",
+    icon: "Plug",
+  },
+  {
+    id: "5",
+    title: "Software Quality Assurance",
+    description: "Structured testing—manual and automated—test plans, regression checks, and quality gates so releases stay stable and user-facing issues are caught early.",
+    icon: "ShieldCheck",
+  },
+  {
+    id: "6",
+    title: "Free Consultation",
+    description: "A no-obligation session to discuss your goals, timeline, and stack—get clarity and next steps before you commit to a build.",
+    icon: "MessageCircle",
+  },
 ];
 
 const defaultExperiences: Experience[] = [
@@ -122,10 +152,9 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
   const [experiences, setExperiences] = useState<Experience[]>(defaultExperiences);
   const [pricing, setPricing] = useState<PricingPackage[]>(defaultPricing);
   const [education, setEducation] = useState<Education[]>(defaultEducation);
-  const [siteSettings, setSiteSettings] = useState<SiteSettings>({ logoText: "dev" });
 
   return (
-    <DataContext.Provider value={{ projects, setProjects, services, setServices, experiences, setExperiences, pricing, setPricing, education, setEducation, siteSettings, setSiteSettings }}>
+    <DataContext.Provider value={{ projects, setProjects, services, setServices, experiences, setExperiences, pricing, setPricing, education, setEducation }}>
       {children}
     </DataContext.Provider>
   );
