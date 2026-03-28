@@ -1,12 +1,12 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Plus, Pencil, Trash2, X, Save, FolderKanban, Wrench, Briefcase, LogOut, Menu, DollarSign, GraduationCap, Settings } from "lucide-react";
+import { Plus, Pencil, Trash2, X, Save, FolderKanban, Wrench, Briefcase, LogOut, Menu, DollarSign, GraduationCap } from "lucide-react";
 import { useData, Project, Service, Experience, PricingPackage, Education } from "@/context/DataContext";
 import { clearAuthToken } from "@/lib/authToken";
 import { toast } from "@/components/ui/sonner";
 import ThemeToggle from "@/components/ThemeToggle";
 
-type Tab = "projects" | "services" | "experience" | "pricing" | "education" | "settings";
+type Tab = "projects" | "services" | "experience" | "pricing" | "education";
 
 const sidebarItems: { key: Tab; label: string; icon: React.ElementType }[] = [
   { key: "projects", label: "Projects", icon: FolderKanban },
@@ -14,12 +14,11 @@ const sidebarItems: { key: Tab; label: string; icon: React.ElementType }[] = [
   { key: "experience", label: "Experience", icon: Briefcase },
   { key: "pricing", label: "Pricing", icon: DollarSign },
   { key: "education", label: "Education", icon: GraduationCap },
-  { key: "settings", label: "Settings", icon: Settings },
 ];
 
 const Dashboard = () => {
   const navigate = useNavigate();
-  const { projects, setProjects, services, setServices, experiences, setExperiences, pricing, setPricing, education, setEducation, siteSettings, setSiteSettings } = useData();
+  const { projects, setProjects, services, setServices, experiences, setExperiences, pricing, setPricing, education, setEducation } = useData();
   const [tab, setTab] = useState<Tab>("projects");
   const [editingId, setEditingId] = useState<string | null>(null);
   const [showForm, setShowForm] = useState(false);
@@ -30,9 +29,6 @@ const Dashboard = () => {
   const [expForm, setExpForm] = useState<Omit<Experience, "id">>({ role: "", company: "", period: "", description: "", tech: [] });
   const [pricingForm, setPricingForm] = useState<Omit<PricingPackage, "id">>({ name: "", price: 0, description: "", features: [], featured: false, visible: true });
   const [eduForm, setEduForm] = useState<Omit<Education, "id">>({ title: "", org: "", year: "", description: "", type: "degree", visible: true });
-
-  // Settings state
-  const [logoInput, setLogoInput] = useState(siteSettings.logoText);
 
   const resetForms = () => {
     setProjectForm({ title: "", description: "", tech: [], link: "", github: "", showOnHome: true, displayOrder: 1 });
@@ -81,11 +77,6 @@ const Dashboard = () => {
     resetForms();
   };
 
-  const handleSaveLogo = () => {
-    setSiteSettings({ ...siteSettings, logoText: logoInput });
-    toast.success("Logo updated");
-  };
-
   const inputClass = "w-full px-3 py-2 bg-secondary border border-border rounded-md text-foreground text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary";
 
   return (
@@ -128,29 +119,27 @@ const Dashboard = () => {
         </header>
 
         <main className="flex-1 p-6 overflow-y-auto">
-          {/* Settings Tab */}
-          {tab === "settings" && (
-            <div className="max-w-lg space-y-8">
-              <div className="p-6 border border-border rounded-lg card-gradient space-y-4">
-                <h3 className="font-semibold text-foreground">Website Logo Text</h3>
-                <input value={logoInput} onChange={(e) => setLogoInput(e.target.value)} placeholder="Logo text" className={inputClass} />
-                <button onClick={handleSaveLogo} className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-md text-sm font-medium hover:bg-primary/90">
-                  <Save className="h-4 w-4" /> Save Logo
-                </button>
-              </div>
-            </div>
-          )}
+          <>
+            {!showForm && (
+              <button
+                type="button"
+                onClick={() => setShowForm(true)}
+                className="mb-6 inline-flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-md text-sm font-medium hover:bg-primary/90 transition-colors"
+              >
+                <Plus className="h-4 w-4" /> Add{" "}
+                {tab === "experience"
+                  ? "Experience"
+                  : tab === "services"
+                    ? "Service"
+                    : tab === "pricing"
+                      ? "Package"
+                      : tab === "education"
+                        ? "Education"
+                        : "Project"}
+              </button>
+            )}
 
-          {/* CRUD sections */}
-          {tab !== "settings" && (
-            <>
-              {!showForm && (
-                <button onClick={() => setShowForm(true)} className="mb-6 inline-flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-md text-sm font-medium hover:bg-primary/90 transition-colors">
-                  <Plus className="h-4 w-4" /> Add {tab === "experience" ? "Experience" : tab === "services" ? "Service" : tab === "pricing" ? "Package" : tab === "education" ? "Education" : "Project"}
-                </button>
-              )}
-
-              {showForm && (
+            {showForm && (
                 <div className="mb-8 p-6 border border-border rounded-lg card-gradient">
                   <div className="flex items-center justify-between mb-4">
                     <h3 className="font-semibold text-foreground">{editingId ? "Edit" : "Add"}</h3>
@@ -187,7 +176,11 @@ const Dashboard = () => {
                       <input value={serviceForm.title} onChange={(e) => setServiceForm({ ...serviceForm, title: e.target.value })} placeholder="Service title" className={inputClass} />
                       <textarea value={serviceForm.description} onChange={(e) => setServiceForm({ ...serviceForm, description: e.target.value })} placeholder="Description" rows={3} className={`${inputClass} resize-none`} />
                       <select value={serviceForm.icon} onChange={(e) => setServiceForm({ ...serviceForm, icon: e.target.value })} className={inputClass}>
-                        {["Code", "Smartphone", "Layout", "Server", "Palette", "Database", "Cloud", "MessageSquare"].map((ic) => <option key={ic} value={ic}>{ic}</option>)}
+                        {["Code", "Smartphone", "Layout", "Server", "Palette", "Database", "Cloud", "MessageSquare", "Plug", "ShieldCheck", "MessageCircle"].map((ic) => (
+                          <option key={ic} value={ic}>
+                            {ic}
+                          </option>
+                        ))}
                       </select>
                       <button onClick={handleSaveService} className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-md text-sm font-medium hover:bg-primary/90"><Save className="h-4 w-4" /> Save</button>
                     </div>
@@ -248,10 +241,10 @@ const Dashboard = () => {
                     </div>
                   )}
                 </div>
-              )}
+            )}
 
-              {/* Lists */}
-              <div className="space-y-4">
+            {/* Lists */}
+            <div className="space-y-4">
                 {tab === "projects" && projects.map((p) => (
                   <div key={p.id} className="flex items-center justify-between p-4 border border-border rounded-lg card-gradient">
                     <div className="flex-1 min-w-0">
@@ -329,9 +322,8 @@ const Dashboard = () => {
                     </div>
                   </div>
                 ))}
-              </div>
-            </>
-          )}
+            </div>
+          </>
         </main>
       </div>
     </div>

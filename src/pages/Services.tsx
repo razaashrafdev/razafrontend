@@ -1,19 +1,14 @@
 import { motion } from "framer-motion";
-import { Code, Smartphone, Layout, CheckCircle2 } from "lucide-react";
+import { CheckCircle2 } from "lucide-react";
 import { Link } from "react-router-dom";
 import LayoutComp from "@/components/Layout";
 import ContactCTA from "@/components/ContactCTA";
 import SectionBadge from "@/components/SectionBadge";
 import { useData } from "@/context/DataContext";
-
-const services = [
-  { icon: Code, title: "Web Development", description: "Modern, responsive web applications built with cutting-edge technologies. From landing pages to complex web apps, I deliver solutions that are fast, accessible, and scalable." },
-  { icon: Smartphone, title: "App Development", description: "Cross-platform mobile applications with native performance. Beautiful user interfaces with smooth interactions that work seamlessly on iOS and Android." },
-  { icon: Layout, title: "CMS Development", description: "Custom content management solutions tailored to your workflow. Easy-to-use admin panels, flexible content models, and seamless publishing experiences." },
-];
+import { getServiceIcon } from "@/lib/serviceIcons";
 
 const Services = () => {
-  const { pricing } = useData();
+  const { pricing, services } = useData();
   const visiblePricing = pricing.filter((p) => p.visible !== false);
 
   return (
@@ -31,7 +26,7 @@ const Services = () => {
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {services.map((service, i) => {
-              const Icon = service.icon;
+              const Icon = getServiceIcon(service.icon);
               return (
                 <motion.div
                   key={service.title}

@@ -9,8 +9,8 @@ const Footer = () => (
         <div className="lg:col-span-1">
           <Link to="/" className="flex items-center gap-2 text-lg font-bold mb-4">
             <Terminal className="h-5 w-5 text-primary" />
-            <span className="font-mono text-gradient">dev</span>
-            <span className="text-foreground">.portfolio</span>
+            <span className="font-mono text-gradient">MUHANNAD</span>
+            <span className="text-foreground">RAZA</span>
           </Link>
           <p className="text-muted-foreground text-sm leading-relaxed mb-6">
             Full-stack developer crafting modern web experiences with clean code, thoughtful design, and scalable architecture.
@@ -96,13 +96,13 @@ const Footer = () => (
       {/* Bottom bar */}
       <div className="mt-12 pt-8 border-t border-border flex flex-col md:flex-row items-center justify-between gap-4">
         <p className="text-sm text-muted-foreground">
-          © {new Date().getFullYear()} dev.portfolio — Built with passion & clean code
+          © {new Date().getFullYear()} Muhannad Raza — Built with passion & clean code
         </p>
         <div className="flex gap-6 text-sm text-muted-foreground">
-          <Link to="/privacy-policy" className="hover:text-primary transition-colors">
+          <Link to="#" className="hover:text-primary transition-colors">
             Privacy Policy
           </Link>
-          <Link to="/terms-of-service" className="hover:text-primary transition-colors">
+          <Link to="#" className="hover:text-primary transition-colors">
             Terms of Service
           </Link>
         </div>
