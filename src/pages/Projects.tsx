@@ -11,29 +11,14 @@ const Projects = () => {
 
   return (
     <Layout>
-      <section className="py-20">
+      <section className="py-12">
         <div className="container mx-auto px-4">
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center mb-12 flex flex-col items-center">
             <SectionBadge text="My Work" />
             <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-4">Projects</h1>
             <p className="text-muted-foreground max-w-xl mx-auto">
-              A collection of projects I've worked on, from full-stack applications to open-source tools.
+              A collection of projects I've worked on, from full-stack applications to useful open-source tools and solutions.
             </p>
-          </motion.div>
-
-          {/* Stats */}
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-16">
-            {[
-              { value: "50+", label: "Total Projects" },
-              { value: "20+", label: "Open Source" },
-              { value: "15+", label: "Client Projects" },
-              { value: "99%", label: "Client Satisfaction" },
-            ].map((s) => (
-              <div key={s.label} className="p-4 rounded-lg border border-border card-gradient text-center">
-                <div className="text-2xl font-bold text-gradient">{s.value}</div>
-                <div className="text-xs text-muted-foreground font-mono mt-1">{s.label}</div>
-              </div>
-            ))}
           </motion.div>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -72,7 +57,7 @@ const Projects = () => {
               { icon: Code2, title: "Clean Code", desc: "Readable, maintainable, and well-documented codebase" },
               { icon: Layers, title: "Modular Design", desc: "Component-based architecture for easy scaling" },
               { icon: Github, title: "Version Control", desc: "Git-based workflow with proper branching strategies" },
-              { icon: ArrowRight, title: "CI/CD", desc: "Automated testing and deployment pipelines" },
+              { icon: ArrowRight, title: "DevOps Automation", desc: "Streamlined processes for testing and releasing code" },
             ].map(({ icon: Icon, title, desc }, i) => (
               <motion.div key={title} initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.1, duration: 0.6 }} className="text-center p-6 rounded-lg border border-border card-gradient">
                 <Icon className="h-8 w-8 text-primary mx-auto mb-3" />

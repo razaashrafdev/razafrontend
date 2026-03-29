@@ -16,24 +16,20 @@ const AboutMe = () => (
         <motion.div {...fadeUp}>
           <div className="flex justify-center lg:justify-start"><SectionBadge text="About Me" /></div>
           <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-6 text-center lg:text-left">
-            Passionate about building <span className="text-gradient">great software</span>
+            Passionate about building <span className="text-gradient">great software applications</span>
           </h2>
           <p className="text-muted-foreground leading-relaxed mb-4">
-            I'm a full-stack developer with over 5 years of experience crafting web applications
-            that are not only functional but also beautiful and intuitive.
-          </p>
-          <p className="text-muted-foreground leading-relaxed mb-8">
-            When I'm not coding, you'll find me exploring new technologies, contributing to
-            open-source projects, or mentoring aspiring developers.
+          Hi! I'm Muhammad Raza a full-stack developer in modern web technologies, building applications that are fast, responsive, and user-friendly. 
+          When I'm not coding, you'll find me working on AI-based projects, learning new technologies, or developing smart systems that solve real-world problems.
           </p>
         </motion.div>
 
         <motion.div {...fadeUp} className="grid grid-cols-2 gap-4">
           {[
-            { icon: Zap, title: "Fast Delivery", desc: "Quick turnaround without compromising quality" },
-            { icon: Shield, title: "Secure Code", desc: "Security best practices baked into every project" },
-            { icon: Rocket, title: "Scalable", desc: "Architecture designed to grow with your business" },
-            { icon: Users, title: "Collaborative", desc: "Transparent process with regular updates" },
+            { icon: Zap, title: "Fast Delivery", desc: "Quick and fast turnaround without compromising quality.." },
+            { icon: Shield, title: "Secure Code", desc: "Security best practices seamlessly baked into every project." },
+            { icon: Rocket, title: "Scalable", desc: "Architecture designed to easily grow with your business." },
+            { icon: Users, title: "Collaborative", desc: "Transparent process with regular timely progress updates." },
           ].map(({ icon: Icon, title, desc }) => (
             <div key={title} className="p-6 rounded-lg border border-border card-gradient hover:border-primary/30 transition-colors">
               <Icon className="h-8 w-8 text-primary mb-3" />
@@ -54,15 +50,15 @@ const WhyWorkWithMe = () => (
         <SectionBadge text="Why Me" />
         <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">Why Work With Me?</h2>
         <p className="text-muted-foreground max-w-2xl mx-auto">
-          I combine technical expertise with a keen eye for design to deliver products that your users will love.
+        I combine strong technical expertise with a keen eye for clean design to deliver products that your users will love.
         </p>
       </motion.div>
 
       <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
         {[
-          { num: "01", title: "End-to-End Development", desc: "From concept to deployment, I handle the entire development lifecycle. Frontend, backend, database, DevOps — all covered under one roof." },
-          { num: "02", title: "Modern Tech Stack", desc: "I stay current with the latest technologies and frameworks to ensure your project is built with the best tools available today." },
-          { num: "03", title: "Results-Driven Approach", desc: "Every line of code I write is focused on achieving your business objectives. Performance, SEO, and user experience are always top priorities." },
+          { num: "01", title: "End-to-End Development", desc: "I can handle the full end-to-end development process and ensure everything runs smoothly using reliable tools and well-structured systems." },
+          { num: "02", title: "Modern Tech Stack", desc: "I stay current with the latest technologies and modern frameworks to ensure your project is built using the best and most reliable tools available today." },
+          { num: "03", title: "Results-Driven Approach", desc: "Every line of code I write is focused on achieving your business objectives. Performance and user experience are always top priorities." },
         ].map((item, i) => (
           <motion.div key={item.num} initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.1, duration: 0.6 }} className="relative text-center">
             <span className="text-6xl font-bold text-primary/10 font-mono">{item.num}</span>
@@ -76,7 +72,7 @@ const WhyWorkWithMe = () => (
 );
 
 const Testimonials = () => (
-  <section className="py-20">
+  <section className="py-20 bg-card/30">
     <div className="container mx-auto px-4">
       <motion.div {...fadeUp} className="text-center mb-16 flex flex-col items-center">
         <SectionBadge text="Testimonials" />
@@ -104,7 +100,7 @@ const Testimonials = () => (
 );
 
 const ProcessSection = () => (
-  <section className="py-20 bg-card/30">
+  <section className="py-20">
     <div className="container mx-auto px-4">
       <motion.div {...fadeUp} className="text-center mb-16 flex flex-col items-center">
         <SectionBadge text="My Process" />
@@ -119,7 +115,7 @@ const ProcessSection = () => (
           { step: "01", title: "Discovery", desc: "Understanding your goals, audience, and requirements through in-depth consultation." },
           { step: "02", title: "Planning", desc: "Creating detailed technical specifications, wireframes, and development roadmap." },
           { step: "03", title: "Development", desc: "Writing clean, tested code with regular progress updates and milestone reviews." },
-          { step: "04", title: "Launch & Support", desc: "Deploying to production with monitoring, followed by ongoing maintenance support." },
+          { step: "04", title: "Support", desc: "Deploying to production with monitoring, followed by ongoing maintenance support." },
         ].map((item, i) => (
           <motion.div key={item.step} initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.1, duration: 0.6 }} className="text-center p-6 rounded-lg border border-border card-gradient">
             <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-primary/10 text-primary font-mono font-bold mb-4">

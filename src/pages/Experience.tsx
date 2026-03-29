@@ -12,7 +12,7 @@ const ExperiencePage = () => {
   return (
     <Layout>
       {/* Hero */}
-      <section className="py-20">
+      <section className="py-12">
         <div className="container mx-auto px-4">
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center mb-12 flex flex-col items-center">
             <SectionBadge text="Career Path" />
@@ -28,7 +28,7 @@ const ExperiencePage = () => {
             <div className="space-y-8">
               {experiences.map((exp, i) => (
                 <motion.div key={exp.id} initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.1, duration: 0.6 }} className="relative pl-16">
-                  <div className="absolute left-4 top-2 w-5 h-5 rounded-full border-2 border-primary bg-background flex items-center justify-center">
+                  <div className="absolute left-3.5 top-0 w-5 h-5 rounded-full border-2 border-primary bg-background flex items-center justify-center">
                     <Briefcase className="h-2.5 w-2.5 text-primary" />
                   </div>
                   <div className="card-gradient border border-border rounded-lg p-6 hover:border-primary/30 transition-colors">
@@ -52,7 +52,7 @@ const ExperiencePage = () => {
         <div className="container mx-auto px-4">
           <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-12 flex flex-col items-center">
             <SectionBadge text="Education" />
-            <h2 className="text-3xl font-bold text-foreground">Education & Certifications</h2>
+            <h2 className="text-3xl font-bold text-foreground">Certifications</h2>
           </motion.div>
 
           <div className="grid md:grid-cols-2 gap-6 max-w-4xl mx-auto">

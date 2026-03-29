@@ -8,7 +8,7 @@ const ServicesPreview = () => {
   const { services } = useData();
 
   return (
-  <section className="py-20 bg-card/30">
+  <section className="py-20">
     <div className="container mx-auto px-4">
       <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.6 }} className="text-center mb-12 flex flex-col items-center">
         <SectionBadge text="What I Do" />
@@ -36,7 +36,7 @@ const ServicesPreview = () => {
       </div>
 
       <motion.div initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }} className="text-center mt-10">
-        <Link to="/services" className="text-sm text-primary hover:underline font-mono">Learn more →</Link>
+        <Link to="/services" className="ml-2 px-5 py-2 text-sm font-medium rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-colors">Learn more →</Link>
       </motion.div>
     </div>
   </section>

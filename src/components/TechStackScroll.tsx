@@ -2,13 +2,13 @@ import { motion } from "framer-motion";
 import SectionBadge from "./SectionBadge";
 
 const techStack = [
-  "React", "TypeScript", "Node.js", "Python", "PostgreSQL", "MongoDB",
-  "Docker", "AWS", "Next.js", "GraphQL", "Redis", "Tailwind CSS",
+  "React", "TypeScript", "Node.js", "Python", "MongoDB",
+  "Docker", "AWS",
 ];
 
 const techStack2 = [
-  "Git", "Linux", "Figma", "Kubernetes", "Express", "Firebase",
-  "Jest", "Prisma", "Vite", "Rust", "Go", "Svelte",
+  "Git", "Figma", "Express", "Firebase",
+  "Vite", "Tailwind CSS", "Next.js"
 ];
 
 const techIcons: Record<string, string> = {
@@ -16,26 +16,16 @@ const techIcons: Record<string, string> = {
   TypeScript: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/typescript/typescript-original.svg",
   "Node.js": "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/nodejs/nodejs-original.svg",
   Python: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/python/python-original.svg",
-  PostgreSQL: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/postgresql/postgresql-original.svg",
   MongoDB: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/mongodb/mongodb-original.svg",
   Docker: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/docker/docker-original.svg",
   AWS: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/amazonwebservices/amazonwebservices-plain-wordmark.svg",
   "Next.js": "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/nextjs/nextjs-original.svg",
-  GraphQL: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/graphql/graphql-plain.svg",
-  Redis: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/redis/redis-original.svg",
   "Tailwind CSS": "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/tailwindcss/tailwindcss-original.svg",
   Git: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/git/git-original.svg",
-  Linux: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/linux/linux-original.svg",
   Figma: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/figma/figma-original.svg",
-  Kubernetes: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/kubernetes/kubernetes-plain.svg",
   Express: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/express/express-original.svg",
   Firebase: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/firebase/firebase-plain.svg",
-  Jest: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/jest/jest-plain.svg",
-  Prisma: "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/prisma/prisma-original.svg",
   Vite: "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/vitejs/vitejs-original.svg",
-  Rust: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/rust/rust-original.svg",
-  Go: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/go/go-original.svg",
-  Svelte: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/svelte/svelte-original.svg",
 };
 
 const TechRow = ({ items, direction }: { items: string[]; direction: "left" | "right" }) => {
@@ -79,7 +69,7 @@ const TechStackScroll = () => (
 
     <div className="relative space-y-6">
       <div className="absolute left-0 top-0 bottom-0 w-32 bg-gradient-to-r from-background to-transparent z-10 pointer-events-none" />
-      <div className="absolute right-0 top-0 bottom-0 w-32 bg-gradient-to-l from-background to-transparent z-10 pointer-events-none" />
+      <div className="absolute right-0 -top-8 bottom-0 w-32 bg-gradient-to-l from-background to-transparent z-10 pointer-events-none" />
       <TechRow items={techStack} direction="left" />
       <TechRow items={techStack2} direction="right" />
     </div>

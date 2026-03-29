@@ -9,7 +9,7 @@ const Footer = () => (
         <div className="lg:col-span-1">
           <Link to="/" className="flex items-center gap-2 text-lg font-bold mb-4">
             <Terminal className="h-5 w-5 text-primary" />
-            <span className="font-mono text-gradient">MUHANNAD</span>
+            <span className="font-mono text-gradient">MUHAMMAD</span>
             <span className="text-foreground">RAZA</span>
           </Link>
           <p className="text-muted-foreground text-sm leading-relaxed mb-6">
@@ -20,7 +20,7 @@ const Footer = () => (
               { icon: Github, href: "#" },
               { icon: Linkedin, href: "#" },
               { icon: Twitter, href: "#" },
-              { icon: Mail, href: "mailto:hello@developer.com" },
+              { icon: Mail, href: "mailto:raza.dev145@gmail.com" },
             ].map(({ icon: Icon, href }, i) => (
               <a
                 key={i}
@@ -60,7 +60,7 @@ const Footer = () => (
         <div>
           <h4 className="font-semibold text-foreground mb-5 text-sm uppercase tracking-wider">Services</h4>
           <div className="flex flex-col gap-3">
-            {["Web Development", "App Development", "CMS Development"].map((s) => (
+            {["Web Development", "App Development", "CMS Development", "API Integration"].map((s) => (
               <Link
                 key={s}
                 to="/services"
@@ -78,9 +78,9 @@ const Footer = () => (
           <h4 className="font-semibold text-foreground mb-5 text-sm uppercase tracking-wider">Contact</h4>
           <div className="flex flex-col gap-4">
             {[
-              { icon: Mail, text: "hello@developer.com" },
-              { icon: Phone, text: "+1 (555) 123-4567" },
-              { icon: MapPin, text: "San Francisco, CA" },
+              { icon: Mail, text: "raza.dev145@gmail.com" },
+              { icon: Phone, text: "+92 309 2438145" },
+              { icon: MapPin, text: "Karachi Pakistan" },
             ].map(({ icon: Icon, text }) => (
               <div key={text} className="flex items-center gap-3">
                 <div className="p-2 rounded-md bg-primary/10">
@@ -96,7 +96,7 @@ const Footer = () => (
       {/* Bottom bar */}
       <div className="mt-12 pt-8 border-t border-border flex flex-col md:flex-row items-center justify-between gap-4">
         <p className="text-sm text-muted-foreground">
-          © {new Date().getFullYear()} Muhannad Raza — Built with passion & clean code
+          © {new Date().getFullYear()} Muhammad Raza — Built with passion
         </p>
         <div className="flex gap-6 text-sm text-muted-foreground">
           <Link to="#" className="hover:text-primary transition-colors">
