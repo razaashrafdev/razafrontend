@@ -48,6 +48,14 @@ export interface Education {
   visible?: boolean;
 }
 
+export interface Testimonial {
+  id: string;
+  quote: string;
+  name: string;
+  role: string;
+  visible?: boolean;
+}
+
 interface DataContextType {
   projects: Project[];
   setProjects: (p: Project[]) => void;
@@ -59,6 +67,8 @@ interface DataContextType {
   setPricing: (p: PricingPackage[]) => void;
   education: Education[];
   setEducation: (e: Education[]) => void;
+  testimonials: Testimonial[];
+  setTestimonials: (t: Testimonial[]) => void;
 }
 
 const DataContext = createContext<DataContextType | null>(null);
@@ -96,15 +106,16 @@ const defaultServices: Service[] = [
   },
   {
     id: "4",
-    title: "API Integration",
-    description: "Connect REST, GraphQL, and third-party APIs with secure auth, error handling, and clear documentation so your services work together reliably.",
-    icon: "Plug",
+    title: "E-commerce Development",
+    description:
+      "Online store builds on WordPress (WooCommerce) and Shopify—custom themes, product catalogs, checkout, payments, and shipping integrations so you can sell with a polished storefront.",
+    icon: "ShoppingCart",
   },
   {
     id: "5",
-    title: "Software Quality Assurance",
-    description: "Structured testing—manual and automated—test plans, regression checks, and quality gates so releases stay stable and user-facing issues are caught early.",
-    icon: "ShieldCheck",
+    title: "API Integration",
+    description: "Connect REST, GraphQL, and third-party APIs with secure auth, error handling, and clear documentation so your services work together reliably.",
+    icon: "Plug",
   },
   {
     id: "6",
@@ -146,15 +157,22 @@ const defaultEducation: Education[] = [
   { id: "4", title: "Full-Stack Web Development", org: "Online Bootcamp", year: "2018", description: "Intensive program covering MERN stack, algorithms, and data structures.", type: "degree", visible: true },
 ];
 
+const defaultTestimonials: Testimonial[] = [
+  { id: "1", quote: "Delivered a complex e-commerce platform ahead of schedule. Clean code, great communication, and incredible attention to detail.", name: "Sarah Johnson", role: "CEO, TechStartup", visible: true },
+  { id: "2", quote: "The best developer I've worked with. Turned our vague ideas into a polished product that our users absolutely love.", name: "Michael Chen", role: "Product Manager, DataFlow", visible: true },
+  { id: "3", quote: "Reliable, skilled, and always goes above and beyond. Our API performance improved by 300% after their optimization work.", name: "Emily Rodriguez", role: "CTO, CloudNine", visible: true },
+];
+
 export const DataProvider = ({ children }: { children: ReactNode }) => {
   const [projects, setProjects] = useState<Project[]>(defaultProjects);
   const [services, setServices] = useState<Service[]>(defaultServices);
   const [experiences, setExperiences] = useState<Experience[]>(defaultExperiences);
   const [pricing, setPricing] = useState<PricingPackage[]>(defaultPricing);
   const [education, setEducation] = useState<Education[]>(defaultEducation);
+  const [testimonials, setTestimonials] = useState<Testimonial[]>(defaultTestimonials);
 
   return (
-    <DataContext.Provider value={{ projects, setProjects, services, setServices, experiences, setExperiences, pricing, setPricing, education, setEducation }}>
+    <DataContext.Provider value={{ projects, setProjects, services, setServices, experiences, setExperiences, pricing, setPricing, education, setEducation, testimonials, setTestimonials }}>
       {children}
     </DataContext.Provider>
   );

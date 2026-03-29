@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import { Zap, Shield, Rocket, Users, CheckCircle2, Quote } from "lucide-react";
 import SectionBadge from "./SectionBadge";
+import { useData } from "@/context/DataContext";
 
 const fadeUp = {
   initial: { opacity: 0, y: 20 },
@@ -10,7 +11,7 @@ const fadeUp = {
 };
 
 const AboutMe = () => (
-  <section className="py-20 bg-card/30">
+  <section className="py-12 nav:py-20 bg-card/30">
     <div className="container mx-auto px-4">
       <div className="grid lg:grid-cols-2 gap-16 items-center">
         <motion.div {...fadeUp}>
@@ -44,7 +45,7 @@ const AboutMe = () => (
 );
 
 const WhyWorkWithMe = () => (
-  <section className="py-20 bg-card/30">
+  <section className="py-12 nav:py-20 bg-card/30">
     <div className="container mx-auto px-4">
       <motion.div {...fadeUp} className="text-center mb-16 flex flex-col items-center">
         <SectionBadge text="Why Me" />
@@ -71,36 +72,51 @@ const WhyWorkWithMe = () => (
   </section>
 );
 
-const Testimonials = () => (
-  <section className="py-20 bg-card/30">
-    <div className="container mx-auto px-4">
-      <motion.div {...fadeUp} className="text-center mb-16 flex flex-col items-center">
-        <SectionBadge text="Testimonials" />
-        <h2 className="text-3xl md:text-4xl font-bold text-foreground">What Clients Say</h2>
-      </motion.div>
+const Testimonials = () => {
+  const { testimonials } = useData();
+  const list = testimonials.filter((t) => t.visible !== false);
+  if (list.length === 0) return null;
 
-      <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
-        {[
-          { quote: "Delivered a complex e-commerce platform ahead of schedule. Clean code, great communication, and incredible attention to detail.", name: "Sarah Johnson", role: "CEO, TechStartup" },
-          { quote: "The best developer I've worked with. Turned our vague ideas into a polished product that our users absolutely love.", name: "Michael Chen", role: "Product Manager, DataFlow" },
-          { quote: "Reliable, skilled, and always goes above and beyond. Our API performance improved by 300% after their optimization work.", name: "Emily Rodriguez", role: "CTO, CloudNine" },
-        ].map((t, i) => (
-          <motion.div key={t.name} initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.1, duration: 0.6 }} className="p-6 rounded-lg border border-border card-gradient">
-            <Quote className="h-6 w-6 text-primary/40 mb-4" />
-            <p className="text-sm text-muted-foreground leading-relaxed mb-6 italic">"{t.quote}"</p>
-            <div>
-              <p className="font-medium text-foreground text-sm">{t.name}</p>
-              <p className="text-xs text-primary/80">{t.role}</p>
-            </div>
-          </motion.div>
-        ))}
+  return (
+    <section className="py-12 nav:py-20 bg-card/30">
+      <div className="container mx-auto px-4">
+        <motion.div {...fadeUp} className="text-center mb-10 nav:mb-16 flex flex-col items-center">
+          <SectionBadge text="Testimonials" />
+          <h2 className="text-3xl md:text-4xl font-bold text-foreground">What Clients Say</h2>
+        </motion.div>
+
+        {/* Mobile: horizontal scroll · Desktop (nav+): 3-column grid */}
+        <div className="max-w-5xl mx-auto w-full">
+        <div
+          className="flex nav:grid nav:grid-cols-3 gap-4 nav:gap-6 overflow-x-auto nav:overflow-visible snap-x snap-mandatory nav:snap-none scrollbar-hide -mx-4 px-4 nav:mx-0 nav:px-0 pb-2 nav:pb-0"
+          style={{ WebkitOverflowScrolling: "touch" }}
+        >
+          {list.map((t, i) => (
+            <motion.div
+              key={t.id}
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: i * 0.08, duration: 0.6 }}
+              className="min-w-[min(100%,17.5rem)] w-[82vw] max-w-sm nav:min-w-0 nav:w-auto flex-shrink-0 nav:flex-shrink snap-center rounded-lg border border-border card-gradient p-5 nav:p-6"
+            >
+              <Quote className="h-6 w-6 text-primary/40 mb-4" />
+              <p className="text-sm text-muted-foreground leading-relaxed mb-6 italic">&ldquo;{t.quote}&rdquo;</p>
+              <div>
+                <p className="font-medium text-foreground text-sm">{t.name}</p>
+                <p className="text-xs text-primary/80">{t.role}</p>
+              </div>
+            </motion.div>
+          ))}
+        </div>
+        </div>
       </div>
-    </div>
-  </section>
-);
+    </section>
+  );
+};
 
 const ProcessSection = () => (
-  <section className="py-20">
+  <section className="py-12 nav:py-20">
     <div className="container mx-auto px-4">
       <motion.div {...fadeUp} className="text-center mb-16 flex flex-col items-center">
         <SectionBadge text="My Process" />

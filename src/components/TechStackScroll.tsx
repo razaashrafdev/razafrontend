@@ -1,14 +1,15 @@
 import { motion } from "framer-motion";
 import SectionBadge from "./SectionBadge";
+import { cn } from "@/lib/utils";
 
 const techStack = [
-  "React", "TypeScript", "Node.js", "Python", "MongoDB",
-  "Docker", "AWS",
+  "React", "TypeScript", "Node.js", "React Native", "Python", "PHP", "MongoDB",
+  "Docker", "AWS", "SQLite",
 ];
 
 const techStack2 = [
-  "Git", "Figma", "Express", "Firebase",
-  "Vite", "Tailwind CSS", "Next.js"
+  "Git", "Figma", "Neon DB", "Express", "Firebase", "Laravel", "Supabase",
+  "Vite", "Tailwind CSS", "Next.js",
 ];
 
 const techIcons: Record<string, string> = {
@@ -26,26 +27,41 @@ const techIcons: Record<string, string> = {
   Express: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/express/express-original.svg",
   Firebase: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/firebase/firebase-plain.svg",
   Vite: "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/vitejs/vitejs-original.svg",
+  PHP: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/php/php-original.svg",
+  Laravel: "https://upload.wikimedia.org/wikipedia/commons/9/9a/Laravel.svg",
+  "React Native": "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/reactnative/reactnative-original.svg",
+  Supabase: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/supabase/supabase-original.svg",
+  SQLite: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/sqlite/sqlite-original.svg",
+  "Neon DB": "/neon-db.png",
 };
 
 const TechRow = ({ items, direction }: { items: string[]; direction: "left" | "right" }) => {
-  // Triple the items to ensure seamless looping
-  const tripled = [...items, ...items, ...items];
+  // Two identical sequences — keyframes move -50% (one sequence width) so loop is seamless
+  const loop = [...items, ...items];
   return (
     <div className="flex overflow-hidden">
       <div
-        className={`flex shrink-0 gap-6 ${
+        className={`flex shrink-0 gap-3 nav:gap-6 ${
           direction === "left" ? "animate-scroll-left" : "animate-scroll-right"
         }`}
         style={{ willChange: "transform" }}
       >
-        {tripled.map((tech, i) => (
+        {loop.map((tech, i) => (
           <div
             key={`${tech}-${i}`}
-            className="flex-shrink-0 flex flex-col items-center gap-3 p-4 rounded-lg bg-secondary/50 border border-border hover:border-primary/30 hover:bg-primary/5 transition-all duration-300 min-w-[100px]"
+            className="flex-shrink-0 flex flex-col items-center gap-1.5 p-2 nav:gap-3 nav:p-4 rounded-md nav:rounded-lg bg-secondary/50 border border-border hover:border-primary/30 hover:bg-primary/5 transition-all duration-300 min-w-[72px] nav:min-w-[100px]"
           >
-            <img src={techIcons[tech]} alt={tech} className="h-10 w-10 object-contain" loading="lazy" />
-            <span className="text-xs font-mono text-muted-foreground whitespace-nowrap">{tech}</span>
+            <img
+              src={techIcons[tech]}
+              alt={tech}
+              className={cn(
+                "h-8 w-8 nav:h-10 nav:w-10 object-contain",
+                tech === "Express" &&
+                  "opacity-95 [filter:brightness(0)] dark:[filter:brightness(0)_invert(1)]",
+              )}
+              loading="lazy"
+            />
+            <span className="text-[10px] nav:text-xs font-mono text-muted-foreground whitespace-nowrap leading-tight">{tech}</span>
           </div>
         ))}
       </div>
@@ -54,7 +70,7 @@ const TechRow = ({ items, direction }: { items: string[]; direction: "left" | "r
 };
 
 const TechStackScroll = () => (
-  <section className="py-20 overflow-hidden">
+  <section className="py-12 nav:py-20 overflow-hidden">
     <div className="container mx-auto px-4 mb-12">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
