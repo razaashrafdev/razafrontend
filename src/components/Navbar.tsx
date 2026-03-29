@@ -27,7 +27,7 @@ const Navbar = () => {
             <span className="font-mono text-gradient font-bolder">RAZA</span>
           </Link>
 
-          {/* Desktop — collapses to hamburger at 875px and below */}
+          {/* Desktop — hamburger below 950px */}
           <div className="hidden nav:flex items-center gap-1">
             {navLinks.map((l) => (
               <Link

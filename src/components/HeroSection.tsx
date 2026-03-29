@@ -1,50 +1,55 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { ArrowRight, ChevronDown } from "lucide-react";
+import { ArrowRight, Briefcase, ChevronDown } from "lucide-react";
 import { Link } from "react-router-dom";
 import SectionBadge from "./SectionBadge";
 
-const ROTATING_WORDS = ["WEB", "APP", "API", "CMS"];
+const ROTATING_WORDS = ["Web", "Mobile", "API", "Cloud"];
 
 const HeroSection = () => {
   const [typed, setTyped] = useState("");
-  const idxRef = useRef(0);
-  const charRef = useRef(0);
-  const deletingRef = useRef(false);
 
   useEffect(() => {
-    let timeout: ReturnType<typeof setTimeout>;
+    let cancelled = false;
+    let wi = 0;
+    let ci = 0;
+    let deleting = false;
+    let id: ReturnType<typeof setTimeout>;
 
-    const tick = () => {
-      const word = ROTATING_WORDS[idxRef.current];
-      if (!deletingRef.current) {
-        if (charRef.current < word.length) {
-          charRef.current += 1;
-          setTyped(word.slice(0, charRef.current));
-          timeout = setTimeout(tick, 75);
+    const loop = () => {
+      if (cancelled) return;
+      const word = ROTATING_WORDS[wi];
+      if (!deleting) {
+        if (ci < word.length) {
+          ci += 1;
+          setTyped(word.slice(0, ci));
+          id = setTimeout(loop, 78);
         } else {
-          timeout = setTimeout(() => {
-            deletingRef.current = true;
-            tick();
-          }, 2200);
+          id = setTimeout(() => {
+            deleting = true;
+            loop();
+          }, 2100);
         }
-      } else if (charRef.current > 0) {
-        charRef.current -= 1;
-        setTyped(word.slice(0, charRef.current));
-        timeout = setTimeout(tick, 42);
+      } else if (ci > 0) {
+        ci -= 1;
+        setTyped(word.slice(0, ci));
+        id = setTimeout(loop, 44);
       } else {
-        deletingRef.current = false;
-        idxRef.current = (idxRef.current + 1) % ROTATING_WORDS.length;
-        timeout = setTimeout(tick, 350);
+        deleting = false;
+        wi = (wi + 1) % ROTATING_WORDS.length;
+        id = setTimeout(loop, 380);
       }
     };
 
-    timeout = setTimeout(tick, 700);
-    return () => clearTimeout(timeout);
+    id = setTimeout(loop, 650);
+    return () => {
+      cancelled = true;
+      clearTimeout(id);
+    };
   }, []);
 
   return (
-    <section className="relative min-h-[110vh] flex items-center overflow-hidden">
+    <section className="relative flex w-full min-h-0 nav:min-h-[110vh] items-start nav:items-center overflow-hidden pt-12 pb-6 nav:pt-0 nav:pb-0">
       <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[600px] h-[600px] rounded-full bg-primary/5 blur-[120px] pointer-events-none" />
 
       <div className="container mx-auto px-4">
@@ -61,21 +66,23 @@ const HeroSection = () => {
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.1 }}
-            className="text-4xl sm:text-5xl md:text-7xl font-bold leading-[1.1] mb-6"
+            className="text-4xl sm:text-5xl md:text-7xl font-bold leading-[1.15] mb-6"
           >
-            I build things
-            <br />
-            for the{" "}
-            <span
-              className="text-gradient glow-text inline-flex items-baseline gap-0"
-              aria-live="polite"
-              aria-atomic="true"
-            >
-              <span>{typed}</span>
-              <span
-                className="inline-block w-0.5 h-[0.75em] sm:h-[0.78em] self-end mb-1 ml-px bg-primary rounded-sm animate-pulse shrink-0"
-                aria-hidden
-              />
+            <span className="block">I build things</span>
+            {/* Ek hi line: flex-wrap se bachne ke liye nowrap + inline flow (empty typed par baseline collapse na ho) */}
+            <span className="mt-1 block w-full px-1 text-center overflow-x-auto overflow-y-hidden scrollbar-hide">
+              <span className="inline-block max-w-full whitespace-nowrap align-middle">
+                <span className="text-foreground">for the </span>
+                <span className="text-gradient glow-text inline font-bold" aria-live="polite" aria-atomic="true">
+                  <span className="inline">
+                    {typed.length > 0 ? typed : "\u00A0"}
+                  </span>
+                  <span
+                    className="inline-block w-0.5 h-[0.78em] align-[-0.06em] mx-0.5 bg-primary rounded-sm animate-pulse"
+                    aria-hidden
+                  />
+                </span>
+              </span>
             </span>
           </motion.h1>
 
@@ -101,9 +108,10 @@ const HeroSection = () => {
               View Projects <ArrowRight className="h-4 w-4" />
             </Link>
             <Link
-              to="#"
+              to="/contact"
               className="inline-flex items-center gap-2 px-6 py-3 border border-border text-foreground font-medium rounded-md hover:bg-secondary transition-colors active:scale-[0.97]"
             >
+              <Briefcase className="h-4 w-4 shrink-0" />
               Hire Me
             </Link>
           </motion.div>
@@ -112,7 +120,7 @@ const HeroSection = () => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.6, delay: 0.5 }}
-            className="flex gap-8 mt-16 mb-16 justify-center"
+            className="flex gap-8 mt-10 mb-6 justify-center nav:mt-16 nav:mb-16"
           >
             {[
               { value: "1+", label: "Years Experience" },
@@ -132,7 +140,7 @@ const HeroSection = () => {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 1 }}
-        className="absolute bottom-8 left-1/2 -translate-x-1/2"
+        className="absolute bottom-4 nav:bottom-8 left-1/2 -translate-x-1/2"
       >
         <ChevronDown className="h-5 w-5 text-muted-foreground animate-bounce" />
       </motion.div>

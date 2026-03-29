@@ -11,6 +11,7 @@ import {
   Plug,
   ShieldCheck,
   MessageCircle,
+  ShoppingCart,
 } from "lucide-react";
 
 const SERVICE_ICONS: Record<string, LucideIcon> = {
@@ -25,6 +26,7 @@ const SERVICE_ICONS: Record<string, LucideIcon> = {
   Plug,
   ShieldCheck,
   MessageCircle,
+  ShoppingCart,
 };
 
 export function getServiceIcon(name: string): LucideIcon {

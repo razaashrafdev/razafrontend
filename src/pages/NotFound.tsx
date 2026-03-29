@@ -10,7 +10,7 @@ const NotFound = () => {
 
   return (
     <Layout>
-      <div className="relative min-h-[calc(100vh-8rem)] flex flex-col items-center justify-center px-4 py-16 overflow-hidden">
+      <div className="relative min-h-[calc(100vh-8rem)] flex flex-col items-center justify-center px-4 pt-12 pb-16 nav:py-16 overflow-hidden">
         <div className="pointer-events-none absolute top-1/3 left-1/2 h-[420px] w-[420px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-primary/10 blur-[100px]" />
         <div className="pointer-events-none absolute bottom-1/4 right-[15%] h-[200px] w-[200px] rounded-full bg-primary/5 blur-[80px]" />
 

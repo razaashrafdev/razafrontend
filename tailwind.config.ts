@@ -15,8 +15,8 @@ export default {
     },
     extend: {
       screens: {
-        /** Navbar: full links from 876px; at 875px and below use hamburger */
-        nav: "876px",
+        /** Navbar: full links from 950px; below 950px use hamburger */
+        nav: "950px",
       },
       fontFamily: {
         sans: ["Lufga", "ui-sans-serif", "system-ui", "sans-serif"],

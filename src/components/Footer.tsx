@@ -60,7 +60,13 @@ const Footer = () => (
         <div>
           <h4 className="font-semibold text-foreground mb-5 text-sm uppercase tracking-wider">Services</h4>
           <div className="flex flex-col gap-3">
-            {["Web Development", "App Development", "CMS Development", "API Integration"].map((s) => (
+            {[
+              "Web Development",
+              "App Development",
+              "CMS Development",
+              "E-commerce Development",
+              "API Integration",
+            ].map((s) => (
               <Link
                 key={s}
                 to="/services"

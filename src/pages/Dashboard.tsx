@@ -1,12 +1,13 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Plus, Pencil, Trash2, X, Save, FolderKanban, Wrench, Briefcase, LogOut, Menu, DollarSign, GraduationCap } from "lucide-react";
-import { useData, Project, Service, Experience, PricingPackage, Education } from "@/context/DataContext";
+import { Plus, Pencil, Trash2, X, Save, FolderKanban, Wrench, Briefcase, LogOut, Menu, DollarSign, GraduationCap, BarChart3, Quote } from "lucide-react";
+import { useData, Project, Service, Experience, PricingPackage, Education, Testimonial } from "@/context/DataContext";
 import { clearAuthToken } from "@/lib/authToken";
 import { toast } from "@/components/ui/sonner";
 import ThemeToggle from "@/components/ThemeToggle";
+import DashboardAnalyticsPanel from "@/components/DashboardAnalyticsPanel";
 
-type Tab = "projects" | "services" | "experience" | "pricing" | "education";
+type Tab = "projects" | "services" | "experience" | "pricing" | "education" | "testimonials" | "analytics";
 
 const sidebarItems: { key: Tab; label: string; icon: React.ElementType }[] = [
   { key: "projects", label: "Projects", icon: FolderKanban },
@@ -14,11 +15,13 @@ const sidebarItems: { key: Tab; label: string; icon: React.ElementType }[] = [
   { key: "experience", label: "Experience", icon: Briefcase },
   { key: "pricing", label: "Pricing", icon: DollarSign },
   { key: "education", label: "Education", icon: GraduationCap },
+  { key: "testimonials", label: "Testimonials", icon: Quote },
+  { key: "analytics", label: "Analytics", icon: BarChart3 },
 ];
 
 const Dashboard = () => {
   const navigate = useNavigate();
-  const { projects, setProjects, services, setServices, experiences, setExperiences, pricing, setPricing, education, setEducation } = useData();
+  const { projects, setProjects, services, setServices, experiences, setExperiences, pricing, setPricing, education, setEducation, testimonials, setTestimonials } = useData();
   const [tab, setTab] = useState<Tab>("projects");
   const [editingId, setEditingId] = useState<string | null>(null);
   const [showForm, setShowForm] = useState(false);
@@ -29,6 +32,7 @@ const Dashboard = () => {
   const [expForm, setExpForm] = useState<Omit<Experience, "id">>({ role: "", company: "", period: "", description: "", tech: [] });
   const [pricingForm, setPricingForm] = useState<Omit<PricingPackage, "id">>({ name: "", price: 0, description: "", features: [], featured: false, visible: true });
   const [eduForm, setEduForm] = useState<Omit<Education, "id">>({ title: "", org: "", year: "", description: "", type: "degree", visible: true });
+  const [testimonialForm, setTestimonialForm] = useState<Omit<Testimonial, "id">>({ quote: "", name: "", role: "", visible: true });
 
   const resetForms = () => {
     setProjectForm({ title: "", description: "", tech: [], link: "", github: "", showOnHome: true, displayOrder: 1 });
@@ -36,6 +40,7 @@ const Dashboard = () => {
     setExpForm({ role: "", company: "", period: "", description: "", tech: [] });
     setPricingForm({ name: "", price: 0, description: "", features: [], featured: false, visible: true });
     setEduForm({ title: "", org: "", year: "", description: "", type: "degree", visible: true });
+    setTestimonialForm({ quote: "", name: "", role: "", visible: true });
     setEditingId(null);
     setShowForm(false);
   };
@@ -76,6 +81,12 @@ const Dashboard = () => {
     toast.success(editingId ? "Education updated" : "Education added");
     resetForms();
   };
+  const handleSaveTestimonial = () => {
+    if (editingId) setTestimonials(testimonials.map((t) => (t.id === editingId ? { ...testimonialForm, id: editingId } : t)));
+    else setTestimonials([...testimonials, { ...testimonialForm, id: Date.now().toString() }]);
+    toast.success(editingId ? "Testimonial updated" : "Testimonial added");
+    resetForms();
+  };
 
   const inputClass = "w-full px-3 py-2 bg-secondary border border-border rounded-md text-foreground text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary";
 
@@ -114,13 +125,17 @@ const Dashboard = () => {
           <button type="button" onClick={() => setSidebarOpen(!sidebarOpen)} className="text-muted-foreground hover:text-foreground">
             <Menu className="h-5 w-5" />
           </button>
-          <h1 className="text-lg font-semibold text-foreground capitalize">{tab}</h1>
+          <h1 className="text-lg font-semibold text-foreground capitalize">
+            {tab === "analytics" ? "Analytics" : tab === "testimonials" ? "Testimonials" : tab}
+          </h1>
           <ThemeToggle className="ml-auto border border-border/60 bg-secondary/30" />
         </header>
 
         <main className="flex-1 p-6 overflow-y-auto">
           <>
-            {!showForm && (
+            {tab === "analytics" && <DashboardAnalyticsPanel />}
+
+            {tab !== "analytics" && !showForm && (
               <button
                 type="button"
                 onClick={() => setShowForm(true)}
@@ -135,11 +150,13 @@ const Dashboard = () => {
                       ? "Package"
                       : tab === "education"
                         ? "Education"
-                        : "Project"}
+                        : tab === "testimonials"
+                          ? "Testimonial"
+                          : "Project"}
               </button>
             )}
 
-            {showForm && (
+            {tab !== "analytics" && showForm && (
                 <div className="mb-8 p-6 border border-border rounded-lg card-gradient">
                   <div className="flex items-center justify-between mb-4">
                     <h3 className="font-semibold text-foreground">{editingId ? "Edit" : "Add"}</h3>
@@ -176,7 +193,7 @@ const Dashboard = () => {
                       <input value={serviceForm.title} onChange={(e) => setServiceForm({ ...serviceForm, title: e.target.value })} placeholder="Service title" className={inputClass} />
                       <textarea value={serviceForm.description} onChange={(e) => setServiceForm({ ...serviceForm, description: e.target.value })} placeholder="Description" rows={3} className={`${inputClass} resize-none`} />
                       <select value={serviceForm.icon} onChange={(e) => setServiceForm({ ...serviceForm, icon: e.target.value })} className={inputClass}>
-                        {["Code", "Smartphone", "Layout", "Server", "Palette", "Database", "Cloud", "MessageSquare", "Plug", "ShieldCheck", "MessageCircle"].map((ic) => (
+                        {["Code", "Smartphone", "Layout", "Server", "Palette", "Database", "Cloud", "MessageSquare", "Plug", "ShieldCheck", "MessageCircle", "ShoppingCart"].map((ic) => (
                           <option key={ic} value={ic}>
                             {ic}
                           </option>
@@ -240,10 +257,26 @@ const Dashboard = () => {
                       <button onClick={handleSaveEducation} className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-md text-sm font-medium hover:bg-primary/90"><Save className="h-4 w-4" /> Save</button>
                     </div>
                   )}
+
+                  {tab === "testimonials" && (
+                    <div className="space-y-4">
+                      <textarea value={testimonialForm.quote} onChange={(e) => setTestimonialForm({ ...testimonialForm, quote: e.target.value })} placeholder="Quote" rows={4} className={`${inputClass} resize-none`} />
+                      <input value={testimonialForm.name} onChange={(e) => setTestimonialForm({ ...testimonialForm, name: e.target.value })} placeholder="Client name" className={inputClass} />
+                      <input value={testimonialForm.role} onChange={(e) => setTestimonialForm({ ...testimonialForm, role: e.target.value })} placeholder="Role / Company" className={inputClass} />
+                      <div className="flex items-center gap-3">
+                        <label className="text-sm text-foreground">Visible on site</label>
+                        <button type="button" onClick={() => setTestimonialForm({ ...testimonialForm, visible: !testimonialForm.visible })} className={`relative w-10 h-5 rounded-full transition-colors ${testimonialForm.visible ? "bg-primary" : "bg-secondary"}`}>
+                          <span className={`absolute top-0.5 left-0.5 w-4 h-4 rounded-full bg-white transition-transform ${testimonialForm.visible ? "translate-x-5" : ""}`} />
+                        </button>
+                      </div>
+                      <button onClick={handleSaveTestimonial} className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-md text-sm font-medium hover:bg-primary/90"><Save className="h-4 w-4" /> Save</button>
+                    </div>
+                  )}
                 </div>
             )}
 
             {/* Lists */}
+            {tab !== "analytics" && (
             <div className="space-y-4">
                 {tab === "projects" && projects.map((p) => (
                   <div key={p.id} className="flex items-center justify-between p-4 border border-border rounded-lg card-gradient">
@@ -322,7 +355,25 @@ const Dashboard = () => {
                     </div>
                   </div>
                 ))}
+
+                {tab === "testimonials" && testimonials.map((t) => (
+                  <div key={t.id} className="flex items-center justify-between p-4 border border-border rounded-lg card-gradient gap-4">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <h4 className="font-medium text-foreground">{t.name}</h4>
+                        <span className="text-xs text-primary/80">{t.role}</span>
+                        {t.visible === false && <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-destructive/10 text-destructive">Hidden</span>}
+                      </div>
+                      <p className="text-sm text-muted-foreground line-clamp-2 mt-1">&ldquo;{t.quote}&rdquo;</p>
+                    </div>
+                    <div className="flex gap-2 flex-shrink-0">
+                      <button onClick={() => { setTestimonialForm({ quote: t.quote, name: t.name, role: t.role, visible: t.visible }); setEditingId(t.id); setShowForm(true); toast("Editing testimonial"); }} className="p-2 text-muted-foreground hover:text-primary transition-colors"><Pencil className="h-4 w-4" /></button>
+                      <button onClick={() => { setTestimonials(testimonials.filter((x) => x.id !== t.id)); toast.success("Testimonial deleted"); }} className="p-2 text-muted-foreground hover:text-destructive transition-colors"><Trash2 className="h-4 w-4" /></button>
+                    </div>
+                  </div>
+                ))}
             </div>
+            )}
           </>
         </main>
       </div>

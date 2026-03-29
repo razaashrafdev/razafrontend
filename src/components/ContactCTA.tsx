@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 import SectionBadge from "./SectionBadge";
 
 const ContactCTA = () => (
-  <section className="py-20">
+  <section className="py-12 nav:py-20">
     <div className="container mx-auto px-4">
       <motion.div
         initial={{ opacity: 0, y: 30 }}

@@ -19,7 +19,7 @@ const FeaturedProjects = () => {
     .slice(0, 3);
 
   return (
-    <section className="py-20">
+    <section className="py-12 nav:py-20">
       <div className="container mx-auto px-4">
         <motion.div {...fadeUp} className="text-center mb-12 flex flex-col items-center">
           <SectionBadge text="Featured Work" />
