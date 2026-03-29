@@ -6,6 +6,7 @@ import ContactCTA from "@/components/ContactCTA";
 import SectionBadge from "@/components/SectionBadge";
 import { useData } from "@/context/DataContext";
 import { getServiceIcon } from "@/lib/serviceIcons";
+import { ProcessSection } from "@/components/HomeSections";
 
 const Services = () => {
   const { pricing, services } = useData();
@@ -14,7 +15,7 @@ const Services = () => {
   return (
     <LayoutComp>
       {/* Hero */}
-      <section className="py-20">
+      <section className="py-12">
         <div className="container mx-auto px-4">
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center mb-12 flex flex-col items-center">
             <SectionBadge text="What I Offer" />
@@ -104,8 +105,12 @@ const Services = () => {
         </div>
       </section>
 
+      <section>
+        <ProcessSection />
+      </section>
+
       {/* FAQ */}
-      <section className="py-20">
+      <section className="py-20 bg-card/30">
         <div className="container mx-auto px-4 max-w-3xl">
           <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-12 flex flex-col items-center">
             <SectionBadge text="FAQ" />

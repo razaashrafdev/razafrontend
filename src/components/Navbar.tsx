@@ -23,7 +23,7 @@ const Navbar = () => {
         <div className="flex h-14 items-center justify-between px-6">
           <Link to="/" className="flex items-center gap-1 text-lg font-bold">
             <Terminal className="h-5 w-5 text-primary" />
-            <span className="text-foreground">MUHANNAD</span>
+            <span className="text-foreground">MUHAMMAD</span>
             <span className="font-mono text-gradient font-bolder">RAZA</span>
           </Link>
 

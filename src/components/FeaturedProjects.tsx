@@ -67,7 +67,7 @@ const FeaturedProjects = () => {
         </div>
 
         <motion.div {...fadeUp} className="text-center mt-10">
-          <Link to="/projects" className="text-sm text-primary hover:underline font-mono">View all →</Link>
+          <Link to="/projects" className="ml-2 px-5 py-2 text-sm font-medium rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-colors">View all →</Link>
         </motion.div>
       </div>
     </section>

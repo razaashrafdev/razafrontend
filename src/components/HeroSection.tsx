@@ -1,9 +1,10 @@
 import { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
-import { ArrowRight, Download, ChevronDown } from "lucide-react";
+import { ArrowRight, ChevronDown } from "lucide-react";
 import { Link } from "react-router-dom";
+import SectionBadge from "./SectionBadge";
 
-const ROTATING_WORDS = ["web", "mobile", "cloud", "apps"];
+const ROTATING_WORDS = ["WEB", "APP", "API", "CMS"];
 
 const HeroSection = () => {
   const [typed, setTyped] = useState("");
@@ -43,7 +44,7 @@ const HeroSection = () => {
   }, []);
 
   return (
-    <section className="relative min-h-[90vh] flex items-center overflow-hidden">
+    <section className="relative min-h-[110vh] flex items-center overflow-hidden">
       <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[600px] h-[600px] rounded-full bg-primary/5 blur-[120px] pointer-events-none" />
 
       <div className="container mx-auto px-4">
@@ -53,10 +54,7 @@ const HeroSection = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
           >
-            <p className="font-mono text-primary text-sm mb-4 flex items-center justify-center gap-2">
-              <span className="inline-block w-2 h-2 rounded-full bg-primary animate-pulse-glow" />
-              Available for work
-            </p>
+            <SectionBadge text="Available for work" />
           </motion.div>
 
           <motion.h1
@@ -102,12 +100,12 @@ const HeroSection = () => {
             >
               View Projects <ArrowRight className="h-4 w-4" />
             </Link>
-            <a
-              href="#"
+            <Link
+              to="#"
               className="inline-flex items-center gap-2 px-6 py-3 border border-border text-foreground font-medium rounded-md hover:bg-secondary transition-colors active:scale-[0.97]"
             >
-              Download CV <Download className="h-4 w-4" />
-            </a>
+              Hire Me
+            </Link>
           </motion.div>
 
           <motion.div

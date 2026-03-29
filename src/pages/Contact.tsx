@@ -17,7 +17,7 @@ const Contact = () => {
 
   return (
     <Layout>
-      <section className="py-20">
+      <section className="py-12">
         <div className="container mx-auto px-4">
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center mb-16 flex flex-col items-center">
             <SectionBadge text="Get in Touch" />
@@ -88,9 +88,9 @@ const Contact = () => {
               className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-12"
             >
               {[
-                { icon: Mail, label: "Email", value: "hello@developer.com" },
-                { icon: Phone, label: "Phone", value: "+1 (555) 123-4567" },
-                { icon: MapPin, label: "Location", value: "San Francisco, CA" },
+                { icon: Mail, label: "Email", value: "raza.dev145@gmail.com" },
+                { icon: Phone, label: "Phone", value: "+92 309 2438145" },
+                { icon: MapPin, label: "Location", value: "Karachi Pakistan" },
               ].map(({ icon: Icon, label, value }) => (
                 <div key={label} className="flex items-center gap-4 p-5 rounded-xl border border-border card-gradient">
                   <div className="p-2.5 rounded-lg bg-primary/10">

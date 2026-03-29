@@ -4,7 +4,7 @@ import TechStackScroll from "@/components/TechStackScroll";
 import FeaturedProjects from "@/components/FeaturedProjects";
 import ServicesPreview from "@/components/ServicesPreview";
 import ContactCTA from "@/components/ContactCTA";
-import { AboutMe, WhyWorkWithMe, Testimonials, ProcessSection } from "@/components/HomeSections";
+import { AboutMe, WhyWorkWithMe, Testimonials } from "@/components/HomeSections";
 
 const Index = () => (
   <Layout>
@@ -15,7 +15,6 @@ const Index = () => (
     <WhyWorkWithMe />
     <ServicesPreview />
     <Testimonials />
-    <ProcessSection />
     <ContactCTA />
   </Layout>
 );
