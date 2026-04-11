@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Plus, Pencil, Trash2, X, Save, FolderKanban, Wrench, Briefcase, LogOut, Menu, DollarSign, GraduationCap, BarChart3, Quote } from "lucide-react";
+import { Plus, Pencil, Trash2, X, Save, FolderKanban, Wrench, Briefcase, LogOut, Menu, DollarSign, GraduationCap, BarChart3, Quote, Loader2 } from "lucide-react";
 import { useData, Project, Service, Experience, PricingPackage, Education, Testimonial } from "@/context/DataContext";
-import { clearAuthToken } from "@/lib/authToken";
+import { clearAuthToken, getAuthToken } from "@/lib/authToken";
+import { createProject, updateProject, deleteProject, createService as apiCreateService, updateService as apiUpdateService, deleteService as apiDeleteService, createExperience as apiCreateExp, updateExperience as apiUpdateExp, deleteExperience as apiDeleteExp, createPricing as apiCreatePricing, updatePricing as apiUpdatePricing, deletePricing as apiDeletePricing, createEducation as apiCreateEdu, updateEducation as apiUpdateEdu, deleteEducation as apiDeleteEdu, createTestimonial as apiCreateTest, updateTestimonial as apiUpdateTest, deleteTestimonial as apiDeleteTest } from "@/lib/api";
 import { toast } from "@/components/ui/sonner";
 import ThemeToggle from "@/components/ThemeToggle";
 import DashboardAnalyticsPanel from "@/components/DashboardAnalyticsPanel";
@@ -21,11 +22,18 @@ const sidebarItems: { key: Tab; label: string; icon: React.ElementType }[] = [
 
 const Dashboard = () => {
   const navigate = useNavigate();
-  const { projects, setProjects, services, setServices, experiences, setExperiences, pricing, setPricing, education, setEducation, testimonials, setTestimonials } = useData();
+  const { projects, setProjects, projectsLoading, services, setServices, servicesLoading, experiences, setExperiences, experiencesLoading, pricing, setPricing, pricingLoading, education, setEducation, educationLoading, testimonials, setTestimonials, testimonialsLoading } = useData();
   const [tab, setTab] = useState<Tab>("projects");
   const [editingId, setEditingId] = useState<string | null>(null);
   const [showForm, setShowForm] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [projectSaving, setProjectSaving] = useState(false);
+  const [projectTechInput, setProjectTechInput] = useState("");
+  const [serviceSaving, setServiceSaving] = useState(false);
+  const [expSaving, setExpSaving] = useState(false);
+  const [pricingSaving, setPricingSaving] = useState(false);
+  const [eduSaving, setEduSaving] = useState(false);
+  const [testSaving, setTestSaving] = useState(false);
 
   const [projectForm, setProjectForm] = useState<Omit<Project, "id">>({ title: "", description: "", tech: [], link: "", github: "", showOnHome: true, displayOrder: 1 });
   const [serviceForm, setServiceForm] = useState<Omit<Service, "id">>({ title: "", description: "", icon: "Code" });
@@ -36,6 +44,7 @@ const Dashboard = () => {
 
   const resetForms = () => {
     setProjectForm({ title: "", description: "", tech: [], link: "", github: "", showOnHome: true, displayOrder: 1 });
+    setProjectTechInput("");
     setServiceForm({ title: "", description: "", icon: "Code" });
     setExpForm({ role: "", company: "", period: "", description: "", tech: [] });
     setPricingForm({ name: "", price: 0, description: "", features: [], featured: false, visible: true });
@@ -51,41 +60,141 @@ const Dashboard = () => {
     navigate("/");
   };
 
-  const handleSaveProject = () => {
-    if (editingId) setProjects(projects.map((p) => (p.id === editingId ? { ...projectForm, id: editingId } : p)));
-    else setProjects([...projects, { ...projectForm, id: Date.now().toString() }]);
-    toast.success(editingId ? "Project updated" : "Project added");
-    resetForms();
+  const handleSaveProject = async () => {
+    const token = getAuthToken();
+    if (!token) { toast.error("Not authenticated"); return; }
+    setProjectSaving(true);
+    try {
+      if (editingId) {
+        const techArray = projectTechInput.split(",").map((s) => s.trim()).filter(Boolean);
+        const payload = { ...projectForm, tech: techArray };
+        const res = await updateProject(editingId, payload, token);
+        setProjects(projects.map((p) => (p.id === editingId ? { ...res.data } : p)));
+        toast.success("Project updated");
+      } else {
+        const techArray = projectTechInput.split(",").map((s) => s.trim()).filter(Boolean);
+        const payload = { ...projectForm, tech: techArray };
+        const res = await createProject(payload, token);
+        setProjects([...projects, res.data]);
+        toast.success("Project added");
+      }
+      resetForms();
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Failed to save project";
+      toast.error(msg);
+    } finally {
+      setProjectSaving(false);
+    }
   };
-  const handleSaveService = () => {
-    if (editingId) setServices(services.map((s) => (s.id === editingId ? { ...serviceForm, id: editingId } : s)));
-    else setServices([...services, { ...serviceForm, id: Date.now().toString() }]);
-    toast.success(editingId ? "Service updated" : "Service added");
-    resetForms();
+  const handleSaveService = async () => {
+    const token = getAuthToken();
+    if (!token) { toast.error("Not authenticated"); return; }
+    setServiceSaving(true);
+    try {
+      if (editingId) {
+        const res = await apiUpdateService(editingId, serviceForm, token);
+        setServices(services.map((s) => (s.id === editingId ? { ...res.data } : s)));
+        toast.success("Service updated");
+      } else {
+        const res = await apiCreateService(serviceForm, token);
+        setServices([...services, res.data]);
+        toast.success("Service added");
+      }
+      resetForms();
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Failed to save service";
+      toast.error(msg);
+    } finally {
+      setServiceSaving(false);
+    }
   };
-  const handleSaveExperience = () => {
-    if (editingId) setExperiences(experiences.map((e) => (e.id === editingId ? { ...expForm, id: editingId } : e)));
-    else setExperiences([...experiences, { ...expForm, id: Date.now().toString() }]);
-    toast.success(editingId ? "Experience updated" : "Experience added");
-    resetForms();
+  const handleSaveExperience = async () => {
+    const token = getAuthToken();
+    if (!token) { toast.error("Not authenticated"); return; }
+    setExpSaving(true);
+    try {
+      if (editingId) {
+        const res = await apiUpdateExp(editingId, expForm, token);
+        setExperiences(experiences.map((e) => (e.id === editingId ? { ...res.data } : e)));
+        toast.success("Experience updated");
+      } else {
+        const res = await apiCreateExp(expForm, token);
+        setExperiences([...experiences, res.data]);
+        toast.success("Experience added");
+      }
+      resetForms();
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Failed to save experience";
+      toast.error(msg);
+    } finally {
+      setExpSaving(false);
+    }
   };
-  const handleSavePricing = () => {
-    if (editingId) setPricing(pricing.map((p) => (p.id === editingId ? { ...pricingForm, id: editingId } : p)));
-    else setPricing([...pricing, { ...pricingForm, id: Date.now().toString() }]);
-    toast.success(editingId ? "Package updated" : "Package added");
-    resetForms();
+  const handleSavePricing = async () => {
+    const token = getAuthToken();
+    if (!token) { toast.error("Not authenticated"); return; }
+    setPricingSaving(true);
+    try {
+      if (editingId) {
+        const res = await apiUpdatePricing(editingId, pricingForm, token);
+        setPricing(pricing.map((p) => (p.id === editingId ? { ...res.data } : p)));
+        toast.success("Package updated");
+      } else {
+        const res = await apiCreatePricing(pricingForm, token);
+        setPricing([...pricing, res.data]);
+        toast.success("Package added");
+      }
+      resetForms();
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Failed to save package";
+      toast.error(msg);
+    } finally {
+      setPricingSaving(false);
+    }
   };
-  const handleSaveEducation = () => {
-    if (editingId) setEducation(education.map((e) => (e.id === editingId ? { ...eduForm, id: editingId } : e)));
-    else setEducation([...education, { ...eduForm, id: Date.now().toString() }]);
-    toast.success(editingId ? "Education updated" : "Education added");
-    resetForms();
+  const handleSaveEducation = async () => {
+    const token = getAuthToken();
+    if (!token) { toast.error("Not authenticated"); return; }
+    setEduSaving(true);
+    try {
+      if (editingId) {
+        const res = await apiUpdateEdu(editingId, eduForm, token);
+        setEducation(education.map((e) => (e.id === editingId ? { ...res.data } : e)));
+        toast.success("Education updated");
+      } else {
+        const res = await apiCreateEdu(eduForm, token);
+        setEducation([...education, res.data]);
+        toast.success("Education added");
+      }
+      resetForms();
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Failed to save education";
+      toast.error(msg);
+    } finally {
+      setEduSaving(false);
+    }
   };
-  const handleSaveTestimonial = () => {
-    if (editingId) setTestimonials(testimonials.map((t) => (t.id === editingId ? { ...testimonialForm, id: editingId } : t)));
-    else setTestimonials([...testimonials, { ...testimonialForm, id: Date.now().toString() }]);
-    toast.success(editingId ? "Testimonial updated" : "Testimonial added");
-    resetForms();
+  const handleSaveTestimonial = async () => {
+    const token = getAuthToken();
+    if (!token) { toast.error("Not authenticated"); return; }
+    setTestSaving(true);
+    try {
+      if (editingId) {
+        const res = await apiUpdateTest(editingId, testimonialForm, token);
+        setTestimonials(testimonials.map((t) => (t.id === editingId ? { ...res.data } : t)));
+        toast.success("Testimonial updated");
+      } else {
+        const res = await apiCreateTest(testimonialForm, token);
+        setTestimonials([...testimonials, res.data]);
+        toast.success("Testimonial added");
+      }
+      resetForms();
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Failed to save testimonial";
+      toast.error(msg);
+    } finally {
+      setTestSaving(false);
+    }
   };
 
   const inputClass = "w-full px-3 py-2 bg-secondary border border-border rounded-md text-foreground text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary";
@@ -167,7 +276,7 @@ const Dashboard = () => {
                     <div className="space-y-4">
                       <input value={projectForm.title} onChange={(e) => setProjectForm({ ...projectForm, title: e.target.value })} placeholder="Project title" className={inputClass} />
                       <textarea value={projectForm.description} onChange={(e) => setProjectForm({ ...projectForm, description: e.target.value })} placeholder="Description" rows={3} className={`${inputClass} resize-none`} />
-                      <input value={projectForm.tech.join(", ")} onChange={(e) => setProjectForm({ ...projectForm, tech: e.target.value.split(",").map((s) => s.trim()).filter(Boolean) })} placeholder="Tech stack (comma separated)" className={inputClass} />
+                      <input value={projectTechInput} onChange={(e) => setProjectTechInput(e.target.value)} placeholder="Tech stack (comma separated, e.g. React, Node.js)" className={inputClass} />
                       <div className="grid grid-cols-2 gap-4">
                         <input value={projectForm.link} onChange={(e) => setProjectForm({ ...projectForm, link: e.target.value })} placeholder="Live URL" className={inputClass} />
                         <input value={projectForm.github} onChange={(e) => setProjectForm({ ...projectForm, github: e.target.value })} placeholder="GitHub URL" className={inputClass} />
@@ -184,7 +293,7 @@ const Dashboard = () => {
                           <input type="number" min={1} value={projectForm.displayOrder ?? 1} onChange={(e) => setProjectForm({ ...projectForm, displayOrder: parseInt(e.target.value) || 1 })} className={inputClass} />
                         </div>
                       </div>
-                      <button onClick={handleSaveProject} className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-md text-sm font-medium hover:bg-primary/90"><Save className="h-4 w-4" /> Save</button>
+                      <button onClick={handleSaveProject} disabled={projectSaving} className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-md text-sm font-medium hover:bg-primary/90 disabled:opacity-60">{projectSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />} {projectSaving ? "Saving…" : "Save"}</button>
                     </div>
                   )}
 
@@ -199,7 +308,7 @@ const Dashboard = () => {
                           </option>
                         ))}
                       </select>
-                      <button onClick={handleSaveService} className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-md text-sm font-medium hover:bg-primary/90"><Save className="h-4 w-4" /> Save</button>
+                      <button onClick={handleSaveService} disabled={serviceSaving} className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-md text-sm font-medium hover:bg-primary/90 disabled:opacity-60">{serviceSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />} {serviceSaving ? "Saving…" : "Save"}</button>
                     </div>
                   )}
 
@@ -210,7 +319,7 @@ const Dashboard = () => {
                       <input value={expForm.period} onChange={(e) => setExpForm({ ...expForm, period: e.target.value })} placeholder="Period (e.g. 2022 — Present)" className={inputClass} />
                       <textarea value={expForm.description} onChange={(e) => setExpForm({ ...expForm, description: e.target.value })} placeholder="Description" rows={3} className={`${inputClass} resize-none`} />
                       <input value={expForm.tech.join(", ")} onChange={(e) => setExpForm({ ...expForm, tech: e.target.value.split(",").map((s) => s.trim()).filter(Boolean) })} placeholder="Tech used (comma separated)" className={inputClass} />
-                      <button onClick={handleSaveExperience} className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-md text-sm font-medium hover:bg-primary/90"><Save className="h-4 w-4" /> Save</button>
+                      <button onClick={handleSaveExperience} disabled={expSaving} className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-md text-sm font-medium hover:bg-primary/90 disabled:opacity-60">{expSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />} {expSaving ? "Saving…" : "Save"}</button>
                     </div>
                   )}
 
@@ -234,7 +343,7 @@ const Dashboard = () => {
                           </button>
                         </div>
                       </div>
-                      <button onClick={handleSavePricing} className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-md text-sm font-medium hover:bg-primary/90"><Save className="h-4 w-4" /> Save</button>
+                      <button onClick={handleSavePricing} disabled={pricingSaving} className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-md text-sm font-medium hover:bg-primary/90 disabled:opacity-60">{pricingSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />} {pricingSaving ? "Saving…" : "Save"}</button>
                     </div>
                   )}
 
@@ -254,7 +363,7 @@ const Dashboard = () => {
                           <span className={`absolute top-0.5 left-0.5 w-4 h-4 rounded-full bg-white transition-transform ${eduForm.visible ? "translate-x-5" : ""}`} />
                         </button>
                       </div>
-                      <button onClick={handleSaveEducation} className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-md text-sm font-medium hover:bg-primary/90"><Save className="h-4 w-4" /> Save</button>
+                      <button onClick={handleSaveEducation} disabled={eduSaving} className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-md text-sm font-medium hover:bg-primary/90 disabled:opacity-60">{eduSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />} {eduSaving ? "Saving…" : "Save"}</button>
                     </div>
                   )}
 
@@ -269,7 +378,7 @@ const Dashboard = () => {
                           <span className={`absolute top-0.5 left-0.5 w-4 h-4 rounded-full bg-white transition-transform ${testimonialForm.visible ? "translate-x-5" : ""}`} />
                         </button>
                       </div>
-                      <button onClick={handleSaveTestimonial} className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-md text-sm font-medium hover:bg-primary/90"><Save className="h-4 w-4" /> Save</button>
+                      <button onClick={handleSaveTestimonial} disabled={testSaving} className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-md text-sm font-medium hover:bg-primary/90 disabled:opacity-60">{testSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />} {testSaving ? "Saving…" : "Save"}</button>
                     </div>
                   )}
                 </div>
@@ -278,7 +387,18 @@ const Dashboard = () => {
             {/* Lists */}
             {tab !== "analytics" && (
             <div className="space-y-4">
-                {tab === "projects" && projects.map((p) => (
+                {tab === "projects" && projectsLoading && (
+                  <div className="flex items-center justify-center py-12 text-muted-foreground gap-2">
+                    <Loader2 className="h-5 w-5 animate-spin" />
+                    <span className="text-sm">Loading projects…</span>
+                  </div>
+                )}
+
+                {tab === "projects" && !projectsLoading && projects.length === 0 && (
+                  <p className="text-sm text-muted-foreground text-center py-10">No projects yet. Click "Add Project" to create one.</p>
+                )}
+
+                {tab === "projects" && !projectsLoading && projects.map((p) => (
                   <div key={p.id} className="flex items-center justify-between p-4 border border-border rounded-lg card-gradient">
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2">
@@ -289,13 +409,35 @@ const Dashboard = () => {
                       <p className="text-sm text-muted-foreground truncate">{p.description}</p>
                     </div>
                     <div className="flex gap-2 ml-4 flex-shrink-0">
-                      <button onClick={() => { setProjectForm({ title: p.title, description: p.description, tech: p.tech, link: p.link, github: p.github, showOnHome: p.showOnHome ?? true, displayOrder: p.displayOrder ?? 1 }); setEditingId(p.id); setShowForm(true); toast("Editing project"); }} className="p-2 text-muted-foreground hover:text-primary transition-colors"><Pencil className="h-4 w-4" /></button>
-                      <button onClick={() => { setProjects(projects.filter((x) => x.id !== p.id)); toast.success("Project deleted"); }} className="p-2 text-muted-foreground hover:text-destructive transition-colors"><Trash2 className="h-4 w-4" /></button>
+                      <button onClick={() => { setProjectForm({ title: p.title, description: p.description, tech: p.tech, link: p.link ?? "", github: p.github ?? "", showOnHome: p.showOnHome ?? true, displayOrder: p.displayOrder ?? 1 }); setProjectTechInput(p.tech.join(", ")); setEditingId(p.id); setShowForm(true); toast("Editing project"); }} className="p-2 text-muted-foreground hover:text-primary transition-colors"><Pencil className="h-4 w-4" /></button>
+                      <button onClick={async () => {
+                        const token = getAuthToken();
+                        if (!token) { toast.error("Not authenticated"); return; }
+                        try {
+                          await deleteProject(p.id, token);
+                          setProjects(projects.filter((x) => x.id !== p.id));
+                          toast.success("Project deleted");
+                        } catch (err: unknown) {
+                          const msg = err instanceof Error ? err.message : "Failed to delete";
+                          toast.error(msg);
+                        }
+                      }} className="p-2 text-muted-foreground hover:text-destructive transition-colors"><Trash2 className="h-4 w-4" /></button>
                     </div>
                   </div>
                 ))}
 
-                {tab === "services" && services.map((s) => (
+                {tab === "services" && servicesLoading && (
+                  <div className="flex items-center justify-center py-12 text-muted-foreground gap-2">
+                    <Loader2 className="h-5 w-5 animate-spin" />
+                    <span className="text-sm">Loading services…</span>
+                  </div>
+                )}
+
+                {tab === "services" && !servicesLoading && services.length === 0 && (
+                  <p className="text-sm text-muted-foreground text-center py-10">No services yet. Click "Add Service" to create one.</p>
+                )}
+
+                {tab === "services" && !servicesLoading && services.map((s) => (
                   <div key={s.id} className="flex items-center justify-between p-4 border border-border rounded-lg card-gradient">
                     <div>
                       <h4 className="font-medium text-foreground">{s.title}</h4>
@@ -303,12 +445,29 @@ const Dashboard = () => {
                     </div>
                     <div className="flex gap-2 ml-4">
                       <button onClick={() => { setServiceForm({ title: s.title, description: s.description, icon: s.icon }); setEditingId(s.id); setShowForm(true); toast("Editing service"); }} className="p-2 text-muted-foreground hover:text-primary transition-colors"><Pencil className="h-4 w-4" /></button>
-                      <button onClick={() => { setServices(services.filter((x) => x.id !== s.id)); toast.success("Service deleted"); }} className="p-2 text-muted-foreground hover:text-destructive transition-colors"><Trash2 className="h-4 w-4" /></button>
+                      <button onClick={async () => {
+                        const token = getAuthToken();
+                        if (!token) { toast.error("Not authenticated"); return; }
+                        try {
+                          await apiDeleteService(s.id, token);
+                          setServices(services.filter((x) => x.id !== s.id));
+                          toast.success("Service deleted");
+                        } catch (err: unknown) {
+                          const msg = err instanceof Error ? err.message : "Failed to delete";
+                          toast.error(msg);
+                        }
+                      }} className="p-2 text-muted-foreground hover:text-destructive transition-colors"><Trash2 className="h-4 w-4" /></button>
                     </div>
                   </div>
                 ))}
 
-                {tab === "experience" && experiences.map((e) => (
+                {tab === "experience" && experiencesLoading && (
+                  <div className="flex items-center justify-center py-12 text-muted-foreground gap-2"><Loader2 className="h-5 w-5 animate-spin" /><span className="text-sm">Loading experiences…</span></div>
+                )}
+                {tab === "experience" && !experiencesLoading && experiences.length === 0 && (
+                  <p className="text-sm text-muted-foreground text-center py-10">No experiences yet. Click "Add Experience" to create one.</p>
+                )}
+                {tab === "experience" && !experiencesLoading && experiences.map((e) => (
                   <div key={e.id} className="flex items-center justify-between p-4 border border-border rounded-lg card-gradient">
                     <div>
                       <h4 className="font-medium text-foreground">{e.role}</h4>
@@ -316,12 +475,29 @@ const Dashboard = () => {
                     </div>
                     <div className="flex gap-2 ml-4">
                       <button onClick={() => { setExpForm({ role: e.role, company: e.company, period: e.period, description: e.description, tech: e.tech }); setEditingId(e.id); setShowForm(true); toast("Editing experience"); }} className="p-2 text-muted-foreground hover:text-primary transition-colors"><Pencil className="h-4 w-4" /></button>
-                      <button onClick={() => { setExperiences(experiences.filter((x) => x.id !== e.id)); toast.success("Experience deleted"); }} className="p-2 text-muted-foreground hover:text-destructive transition-colors"><Trash2 className="h-4 w-4" /></button>
+                      <button onClick={async () => {
+                        const token = getAuthToken();
+                        if (!token) { toast.error("Not authenticated"); return; }
+                        try {
+                          await apiDeleteExp(e.id, token);
+                          setExperiences(experiences.filter((x) => x.id !== e.id));
+                          toast.success("Experience deleted");
+                        } catch (err: unknown) {
+                          const msg = err instanceof Error ? err.message : "Failed to delete";
+                          toast.error(msg);
+                        }
+                      }} className="p-2 text-muted-foreground hover:text-destructive transition-colors"><Trash2 className="h-4 w-4" /></button>
                     </div>
                   </div>
                 ))}
 
-                {tab === "pricing" && pricing.map((p) => (
+                {tab === "pricing" && pricingLoading && (
+                  <div className="flex items-center justify-center py-12 text-muted-foreground gap-2"><Loader2 className="h-5 w-5 animate-spin" /><span className="text-sm">Loading pricing…</span></div>
+                )}
+                {tab === "pricing" && !pricingLoading && pricing.length === 0 && (
+                  <p className="text-sm text-muted-foreground text-center py-10">No packages yet. Click "Add Package" to create one.</p>
+                )}
+                {tab === "pricing" && !pricingLoading && pricing.map((p) => (
                   <div key={p.id} className="flex items-center justify-between p-4 border border-border rounded-lg card-gradient">
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2">
@@ -334,12 +510,29 @@ const Dashboard = () => {
                     </div>
                     <div className="flex gap-2 ml-4 flex-shrink-0">
                       <button onClick={() => { setPricingForm({ name: p.name, price: p.price, description: p.description, features: p.features, featured: p.featured, visible: p.visible }); setEditingId(p.id); setShowForm(true); toast("Editing package"); }} className="p-2 text-muted-foreground hover:text-primary transition-colors"><Pencil className="h-4 w-4" /></button>
-                      <button onClick={() => { setPricing(pricing.filter((x) => x.id !== p.id)); toast.success("Package deleted"); }} className="p-2 text-muted-foreground hover:text-destructive transition-colors"><Trash2 className="h-4 w-4" /></button>
+                      <button onClick={async () => {
+                        const token = getAuthToken();
+                        if (!token) { toast.error("Not authenticated"); return; }
+                        try {
+                          await apiDeletePricing(p.id, token);
+                          setPricing(pricing.filter((x) => x.id !== p.id));
+                          toast.success("Package deleted");
+                        } catch (err: unknown) {
+                          const msg = err instanceof Error ? err.message : "Failed to delete";
+                          toast.error(msg);
+                        }
+                      }} className="p-2 text-muted-foreground hover:text-destructive transition-colors"><Trash2 className="h-4 w-4" /></button>
                     </div>
                   </div>
                 ))}
 
-                {tab === "education" && education.map((e) => (
+                {tab === "education" && educationLoading && (
+                  <div className="flex items-center justify-center py-12 text-muted-foreground gap-2"><Loader2 className="h-5 w-5 animate-spin" /><span className="text-sm">Loading education…</span></div>
+                )}
+                {tab === "education" && !educationLoading && education.length === 0 && (
+                  <p className="text-sm text-muted-foreground text-center py-10">No education entries yet. Click "Add Education" to create one.</p>
+                )}
+                {tab === "education" && !educationLoading && education.map((e) => (
                   <div key={e.id} className="flex items-center justify-between p-4 border border-border rounded-lg card-gradient">
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2">
@@ -351,12 +544,29 @@ const Dashboard = () => {
                     </div>
                     <div className="flex gap-2 ml-4 flex-shrink-0">
                       <button onClick={() => { setEduForm({ title: e.title, org: e.org, year: e.year, description: e.description, type: e.type, visible: e.visible }); setEditingId(e.id); setShowForm(true); toast("Editing education"); }} className="p-2 text-muted-foreground hover:text-primary transition-colors"><Pencil className="h-4 w-4" /></button>
-                      <button onClick={() => { setEducation(education.filter((x) => x.id !== e.id)); toast.success("Education deleted"); }} className="p-2 text-muted-foreground hover:text-destructive transition-colors"><Trash2 className="h-4 w-4" /></button>
+                      <button onClick={async () => {
+                        const token = getAuthToken();
+                        if (!token) { toast.error("Not authenticated"); return; }
+                        try {
+                          await apiDeleteEdu(e.id, token);
+                          setEducation(education.filter((x) => x.id !== e.id));
+                          toast.success("Education deleted");
+                        } catch (err: unknown) {
+                          const msg = err instanceof Error ? err.message : "Failed to delete";
+                          toast.error(msg);
+                        }
+                      }} className="p-2 text-muted-foreground hover:text-destructive transition-colors"><Trash2 className="h-4 w-4" /></button>
                     </div>
                   </div>
                 ))}
 
-                {tab === "testimonials" && testimonials.map((t) => (
+                {tab === "testimonials" && testimonialsLoading && (
+                  <div className="flex items-center justify-center py-12 text-muted-foreground gap-2"><Loader2 className="h-5 w-5 animate-spin" /><span className="text-sm">Loading testimonials…</span></div>
+                )}
+                {tab === "testimonials" && !testimonialsLoading && testimonials.length === 0 && (
+                  <p className="text-sm text-muted-foreground text-center py-10">No testimonials yet. Click "Add Testimonial" to create one.</p>
+                )}
+                {tab === "testimonials" && !testimonialsLoading && testimonials.map((t) => (
                   <div key={t.id} className="flex items-center justify-between p-4 border border-border rounded-lg card-gradient gap-4">
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 flex-wrap">
@@ -368,7 +578,18 @@ const Dashboard = () => {
                     </div>
                     <div className="flex gap-2 flex-shrink-0">
                       <button onClick={() => { setTestimonialForm({ quote: t.quote, name: t.name, role: t.role, visible: t.visible }); setEditingId(t.id); setShowForm(true); toast("Editing testimonial"); }} className="p-2 text-muted-foreground hover:text-primary transition-colors"><Pencil className="h-4 w-4" /></button>
-                      <button onClick={() => { setTestimonials(testimonials.filter((x) => x.id !== t.id)); toast.success("Testimonial deleted"); }} className="p-2 text-muted-foreground hover:text-destructive transition-colors"><Trash2 className="h-4 w-4" /></button>
+                      <button onClick={async () => {
+                        const token = getAuthToken();
+                        if (!token) { toast.error("Not authenticated"); return; }
+                        try {
+                          await apiDeleteTest(t.id, token);
+                          setTestimonials(testimonials.filter((x) => x.id !== t.id));
+                          toast.success("Testimonial deleted");
+                        } catch (err: unknown) {
+                          const msg = err instanceof Error ? err.message : "Failed to delete";
+                          toast.error(msg);
+                        }
+                      }} className="p-2 text-muted-foreground hover:text-destructive transition-colors"><Trash2 className="h-4 w-4" /></button>
                     </div>
                   </div>
                 ))}

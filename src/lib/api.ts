@@ -85,3 +85,202 @@ export function verifyOtp(email: string, code: string) {
   );
 }
 
+// ── Projects ──────────────────────────────────────────────────────────────────
+
+type ProjectPayload = {
+  title: string;
+  description: string;
+  tech: string[];
+  link?: string;
+  github?: string;
+  showOnHome?: boolean;
+  displayOrder?: number;
+};
+
+type ProjectData = {
+  id: string;
+  title: string;
+  description: string;
+  tech: string[];
+  link?: string;
+  github?: string;
+  showOnHome?: boolean;
+  displayOrder?: number;
+  createdAt?: string;
+  updatedAt?: string;
+};
+
+type ProjectResponse = { success: boolean; data: ProjectData };
+type ProjectsListResponse = { success: boolean; data: ProjectData[] };
+
+export function fetchProjects() {
+  return apiFetch<ProjectsListResponse>("/api/projects/list", { method: "GET" });
+}
+
+export function createProject(payload: ProjectPayload, token: string) {
+  return apiFetch<ProjectResponse>(
+    "/api/projects/add",
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    },
+    token
+  );
+}
+
+export function updateProject(id: string, payload: Partial<ProjectPayload>, token: string) {
+  return apiFetch<ProjectResponse>(
+    `/api/projects/edit/${id}`,
+    {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    },
+    token
+  );
+}
+
+export function deleteProject(id: string, token: string) {
+  return apiFetch<{ success: boolean; message: string }>(
+    `/api/projects/remove/${id}`,
+    { method: "DELETE" },
+    token
+  );
+}
+
+// ── Services ──────────────────────────────────────────────────────────────────
+
+type ServicePayload = {
+  title: string;
+  description: string;
+  icon: string;
+};
+
+type ServiceData = {
+  id: string;
+  title: string;
+  description: string;
+  icon: string;
+  createdAt?: string;
+  updatedAt?: string;
+};
+
+type ServiceResponse = { success: boolean; data: ServiceData };
+type ServicesListResponse = { success: boolean; data: ServiceData[] };
+
+export function fetchServices() {
+  return apiFetch<ServicesListResponse>("/api/services/list", { method: "GET" });
+}
+
+export function createService(payload: ServicePayload, token: string) {
+  return apiFetch<ServiceResponse>(
+    "/api/services/add",
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    },
+    token
+  );
+}
+
+export function updateService(id: string, payload: Partial<ServicePayload>, token: string) {
+  return apiFetch<ServiceResponse>(
+    `/api/services/edit/${id}`,
+    {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    },
+    token
+  );
+}
+
+export function deleteService(id: string, token: string) {
+  return apiFetch<{ success: boolean; message: string }>(
+    `/api/services/remove/${id}`,
+    { method: "DELETE" },
+    token
+  );
+}
+
+// ── Experiences ───────────────────────────────────────────────────────────────
+
+type ExperiencePayload = { role: string; company: string; period: string; description: string; tech: string[] };
+type ExperienceData = ExperiencePayload & { id: string; createdAt?: string; updatedAt?: string };
+type ExperienceResponse = { success: boolean; data: ExperienceData };
+type ExperiencesListResponse = { success: boolean; data: ExperienceData[] };
+
+export function fetchExperiences() {
+  return apiFetch<ExperiencesListResponse>("/api/experiences/list", { method: "GET" });
+}
+export function createExperience(payload: ExperiencePayload, token: string) {
+  return apiFetch<ExperienceResponse>("/api/experiences/add", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) }, token);
+}
+export function updateExperience(id: string, payload: Partial<ExperiencePayload>, token: string) {
+  return apiFetch<ExperienceResponse>(`/api/experiences/edit/${id}`, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) }, token);
+}
+export function deleteExperience(id: string, token: string) {
+  return apiFetch<{ success: boolean; message: string }>(`/api/experiences/remove/${id}`, { method: "DELETE" }, token);
+}
+
+// ── Pricing ───────────────────────────────────────────────────────────────────
+
+type PricingPayload = { name: string; price: number; description: string; features: string[]; featured?: boolean; visible?: boolean };
+type PricingData = PricingPayload & { id: string; createdAt?: string; updatedAt?: string };
+type PricingResponse = { success: boolean; data: PricingData };
+type PricingListResponse = { success: boolean; data: PricingData[] };
+
+export function fetchPricing() {
+  return apiFetch<PricingListResponse>("/api/pricing/list", { method: "GET" });
+}
+export function createPricing(payload: PricingPayload, token: string) {
+  return apiFetch<PricingResponse>("/api/pricing/add", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) }, token);
+}
+export function updatePricing(id: string, payload: Partial<PricingPayload>, token: string) {
+  return apiFetch<PricingResponse>(`/api/pricing/edit/${id}`, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) }, token);
+}
+export function deletePricing(id: string, token: string) {
+  return apiFetch<{ success: boolean; message: string }>(`/api/pricing/remove/${id}`, { method: "DELETE" }, token);
+}
+
+// ── Education ─────────────────────────────────────────────────────────────────
+
+type EducationPayload = { title: string; org: string; year: string; description: string; type: "degree" | "certification"; visible?: boolean };
+type EducationData = EducationPayload & { id: string; createdAt?: string; updatedAt?: string };
+type EducationResponse = { success: boolean; data: EducationData };
+type EducationListResponse = { success: boolean; data: EducationData[] };
+
+export function fetchEducation() {
+  return apiFetch<EducationListResponse>("/api/education/list", { method: "GET" });
+}
+export function createEducation(payload: EducationPayload, token: string) {
+  return apiFetch<EducationResponse>("/api/education/add", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) }, token);
+}
+export function updateEducation(id: string, payload: Partial<EducationPayload>, token: string) {
+  return apiFetch<EducationResponse>(`/api/education/edit/${id}`, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) }, token);
+}
+export function deleteEducation(id: string, token: string) {
+  return apiFetch<{ success: boolean; message: string }>(`/api/education/remove/${id}`, { method: "DELETE" }, token);
+}
+
+// ── Testimonials ──────────────────────────────────────────────────────────────
+
+type TestimonialPayload = { quote: string; name: string; role: string; visible?: boolean };
+type TestimonialData = TestimonialPayload & { id: string; createdAt?: string; updatedAt?: string };
+type TestimonialResponse = { success: boolean; data: TestimonialData };
+type TestimonialsListResponse = { success: boolean; data: TestimonialData[] };
+
+export function fetchTestimonials() {
+  return apiFetch<TestimonialsListResponse>("/api/testimonials/list", { method: "GET" });
+}
+export function createTestimonial(payload: TestimonialPayload, token: string) {
+  return apiFetch<TestimonialResponse>("/api/testimonials/add", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) }, token);
+}
+export function updateTestimonial(id: string, payload: Partial<TestimonialPayload>, token: string) {
+  return apiFetch<TestimonialResponse>(`/api/testimonials/edit/${id}`, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) }, token);
+}
+export function deleteTestimonial(id: string, token: string) {
+  return apiFetch<{ success: boolean; message: string }>(`/api/testimonials/remove/${id}`, { method: "DELETE" }, token);
+}
