@@ -71,8 +71,8 @@ const Login = () => {
       const ttlSeconds = res.expiresIn || 60;
       setExpiresAt(Date.now() + ttlSeconds * 1000);
       setRemainingSeconds(ttlSeconds);
-    } catch (err: any) {
-      const msg = err?.message || "Failed to send OTP";
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : (err && typeof err === "object" && "message" in err) ? String((err as Record<string, unknown>).message) : "Failed to send OTP";
       if (String(msg).toLowerCase().includes("email is wrong")) {
         toast.error("Email is wrong");
       } else {
@@ -96,8 +96,8 @@ const Login = () => {
       setAuthToken(res.token);
       toast.success("Login successful!");
       navigate("/dashboard", { replace: true });
-    } catch (err: any) {
-      const msg = err?.message || "Authentication failed";
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : (err && typeof err === "object" && "message" in err) ? String((err as Record<string, unknown>).message) : "Authentication failed";
       if (String(msg).toLowerCase().includes("otp")) {
         toast.error("OTP is wrong");
       } else {
