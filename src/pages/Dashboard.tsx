@@ -203,9 +203,8 @@ const Dashboard = () => {
     <div className="h-screen bg-background flex overflow-hidden">
       {/* Fixed Sidebar */}
       <aside className={`${sidebarOpen ? "w-64" : "w-0 overflow-hidden"} border-r border-border bg-card/50 flex flex-col transition-all duration-300 flex-shrink-0 h-screen sticky top-0`}>
-        <div className="p-6 border-b border-border">
+        <div className="p-4 border-b border-border">
           <h2 className="font-bold text-foreground text-lg">Dashboard</h2>
-          <p className="text-xs text-muted-foreground mt-1">Manage your portfolio</p>
         </div>
         <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
           {sidebarItems.map((item) => (

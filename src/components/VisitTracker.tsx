@@ -3,7 +3,7 @@ import { useLocation } from "react-router-dom";
 import { recordPageView } from "@/lib/traffic";
 
 /**
- * Records public page views into localStorage for the dashboard Analytics tab.
+ * Records public page views into the database for the dashboard Analytics tab.
  * Admin routes are excluded so dashboard usage does not inflate “site” traffic.
  */
 const VisitTracker = () => {
