@@ -51,7 +51,7 @@ const DashboardAnalyticsPanel = () => {
   const twelveMonthsChart = [...stats.last12Months];
 
   return (
-    <div className="space-y-8 max-w-5xl">
+    <div className="w-full min-w-0 space-y-8">
       <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
         <p className="text-sm text-muted-foreground leading-relaxed">
           Traffic is collected from visitors on this site across all devices. Admin browsing is excluded. For full enterprise analytics,
@@ -67,22 +67,22 @@ const DashboardAnalyticsPanel = () => {
         </button>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="p-5 rounded-lg border border-border bg-card/40 card-gradient">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 w-full">
+        <div className="p-5 rounded-lg border border-border bg-card/40 card-gradient w-full min-w-0">
           <div className="flex items-center gap-2 text-muted-foreground text-xs font-medium uppercase tracking-wide mb-2">
             <Eye className="h-4 w-4" /> Total site views
           </div>
           <p className="text-3xl font-bold text-foreground tabular-nums">{stats.totalViews.toLocaleString()}</p>
           <p className="text-xs text-muted-foreground mt-1">Past 365 days aggregated</p>
         </div>
-        <div className="p-5 rounded-lg border border-border bg-card/40 card-gradient">
+        <div className="p-5 rounded-lg border border-border bg-card/40 card-gradient w-full min-w-0">
           <div className="flex items-center gap-2 text-muted-foreground text-xs font-medium uppercase tracking-wide mb-2">
             <CalendarDays className="h-4 w-4" /> Today
           </div>
           <p className="text-3xl font-bold text-foreground tabular-nums">{stats.todayViews.toLocaleString()}</p>
           <p className="text-xs text-muted-foreground mt-1">UTC Timezone</p>
         </div>
-        <div className="p-5 rounded-lg border border-border bg-card/40 card-gradient">
+        <div className="p-5 rounded-lg border border-border bg-card/40 card-gradient w-full min-w-0">
           <div className="flex items-center gap-2 text-muted-foreground text-xs font-medium uppercase tracking-wide mb-2">
             <BarChart3 className="h-4 w-4" /> Last 7 days
           </div>
@@ -91,15 +91,15 @@ const DashboardAnalyticsPanel = () => {
         </div>
       </div>
 
-      <div className="p-6 rounded-lg border border-border bg-card/40 card-gradient">
+      <div className="p-6 rounded-lg border border-border bg-card/40 card-gradient w-full min-w-0">
         <h3 className="text-sm font-semibold text-foreground mb-4 flex items-center gap-2">
           <BarChart3 className="h-4 w-4 text-primary" /> One Year of Records
         </h3>
-        <div className="flex items-end gap-2 h-40">
+        <div className="flex items-end gap-1 sm:gap-2 h-44 lg:h-52 w-full min-w-0">
           {twelveMonthsChart.map((m) => (
             <div key={m.monthKey} className="flex-1 min-w-0 flex flex-col justify-end items-center gap-1 group">
               <div
-                className="w-full max-w-[24px] mx-auto rounded-t bg-primary/80 group-hover:bg-primary transition-colors"
+                className="w-full max-w-[2.5rem] sm:max-w-none mx-auto rounded-t bg-primary/80 group-hover:bg-primary transition-colors"
                 style={{ height: `${(m.count / maxMonth) * 100}%`, minHeight: m.count > 0 ? "4px" : "0" }}
                 title={`${m.label}: ${m.count}`}
               />
@@ -109,7 +109,7 @@ const DashboardAnalyticsPanel = () => {
         </div>
       </div>
 
-      <div className="p-6 rounded-lg border border-border bg-card/40 card-gradient">
+      <div className="p-6 rounded-lg border border-border bg-card/40 card-gradient w-full min-w-0">
         <h3 className="text-sm font-semibold text-foreground mb-4 flex items-center gap-2">
           <Globe className="h-4 w-4 text-primary" /> Top pages
         </h3>

@@ -1,14 +1,24 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Plus, Pencil, Trash2, X, Save, FolderKanban, Wrench, Briefcase, LogOut, Menu, DollarSign, GraduationCap, BarChart3, Quote, Loader2 } from "lucide-react";
+import { Plus, Pencil, Trash2, X, Save, FolderKanban, Wrench, Briefcase, LogOut, Menu, DollarSign, GraduationCap, BarChart3, Quote, Loader2, Mail } from "lucide-react";
 import { useData, Project, Service, Experience, PricingPackage, Education, Testimonial } from "@/context/DataContext";
 import { clearAuthToken, getAuthToken } from "@/lib/authToken";
-import { createProject, updateProject, deleteProject, createService as apiCreateService, updateService as apiUpdateService, deleteService as apiDeleteService, createExperience as apiCreateExp, updateExperience as apiUpdateExp, deleteExperience as apiDeleteExp, createPricing as apiCreatePricing, updatePricing as apiUpdatePricing, deletePricing as apiDeletePricing, createEducation as apiCreateEdu, updateEducation as apiUpdateEdu, deleteEducation as apiDeleteEdu, createTestimonial as apiCreateTest, updateTestimonial as apiUpdateTest, deleteTestimonial as apiDeleteTest } from "@/lib/api";
+import { createProject, updateProject, deleteProject, createService as apiCreateService, updateService as apiUpdateService, deleteService as apiDeleteService, createExperience as apiCreateExp, updateExperience as apiUpdateExp, deleteExperience as apiDeleteExp, createPricing as apiCreatePricing, updatePricing as apiUpdatePricing, deletePricing as apiDeletePricing, createEducation as apiCreateEdu, updateEducation as apiUpdateEdu, deleteEducation as apiDeleteEdu, createTestimonial as apiCreateTest, updateTestimonial as apiUpdateTest, deleteTestimonial as apiDeleteTest, fetchContactMessages, deleteContactMessage, type ContactMessage } from "@/lib/api";
 import { toast } from "@/components/ui/sonner";
 import ThemeToggle from "@/components/ThemeToggle";
 import DashboardAnalyticsPanel from "@/components/DashboardAnalyticsPanel";
 
-type Tab = "projects" | "services" | "experience" | "pricing" | "education" | "testimonials" | "analytics";
+type Tab = "projects" | "services" | "experience" | "pricing" | "education" | "testimonials" | "contact-inbox" | "analytics";
+
+const HOME_LIMIT_TOAST = "first remove one project from home to show this project in home page";
+
+function projectShownOnHome(p: { showOnHome?: boolean }) {
+  return p.showOnHome !== false;
+}
+
+function countOthersOnHome(projects: Project[], excludeId: string | null) {
+  return projects.filter((p) => p.id !== excludeId && projectShownOnHome(p)).length;
+}
 
 const sidebarItems: { key: Tab; label: string; icon: React.ElementType }[] = [
   { key: "projects", label: "Projects", icon: FolderKanban },
@@ -17,6 +27,7 @@ const sidebarItems: { key: Tab; label: string; icon: React.ElementType }[] = [
   { key: "pricing", label: "Pricing", icon: DollarSign },
   { key: "education", label: "Education", icon: GraduationCap },
   { key: "testimonials", label: "Testimonials", icon: Quote },
+  { key: "contact-inbox", label: "Messages", icon: Mail },
   { key: "analytics", label: "Analytics", icon: BarChart3 },
 ];
 
@@ -34,8 +45,12 @@ const Dashboard = () => {
   const [pricingSaving, setPricingSaving] = useState(false);
   const [eduSaving, setEduSaving] = useState(false);
   const [testSaving, setTestSaving] = useState(false);
+  const [homeToggleId, setHomeToggleId] = useState<string | null>(null);
+  const [contactMessages, setContactMessages] = useState<ContactMessage[]>([]);
+  const [contactMessagesLoading, setContactMessagesLoading] = useState(false);
+  const [contactDeletingId, setContactDeletingId] = useState<string | null>(null);
 
-  const [projectForm, setProjectForm] = useState<Omit<Project, "id">>({ title: "", description: "", tech: [], link: "", github: "", showOnHome: true, displayOrder: 1 });
+  const [projectForm, setProjectForm] = useState<Omit<Project, "id">>({ title: "", description: "", tech: [], link: "", github: "", showOnHome: false });
   const [serviceForm, setServiceForm] = useState<Omit<Service, "id">>({ title: "", description: "", icon: "Code" });
   const [expForm, setExpForm] = useState<Omit<Experience, "id">>({ role: "", company: "", period: "", description: "", tech: [] });
   const [pricingForm, setPricingForm] = useState<Omit<PricingPackage, "id">>({ name: "", price: 0, description: "", features: [], featured: false, visible: true });
@@ -43,7 +58,7 @@ const Dashboard = () => {
   const [testimonialForm, setTestimonialForm] = useState<Omit<Testimonial, "id">>({ quote: "", name: "", role: "", visible: true });
 
   const resetForms = () => {
-    setProjectForm({ title: "", description: "", tech: [], link: "", github: "", showOnHome: true, displayOrder: 1 });
+    setProjectForm({ title: "", description: "", tech: [], link: "", github: "", showOnHome: false });
     setProjectTechInput("");
     setServiceForm({ title: "", description: "", icon: "Code" });
     setExpForm({ role: "", company: "", period: "", description: "", tech: [] });
@@ -54,6 +69,20 @@ const Dashboard = () => {
     setShowForm(false);
   };
 
+  useEffect(() => {
+    if (tab !== "contact-inbox") return;
+    const token = getAuthToken();
+    if (!token) return;
+    setContactMessagesLoading(true);
+    fetchContactMessages(token)
+      .then((res) => setContactMessages(res.data ?? []))
+      .catch(() => {
+        toast.error("Failed to load contact messages");
+        setContactMessages([]);
+      })
+      .finally(() => setContactMessagesLoading(false));
+  }, [tab]);
+
   const handleLogout = () => {
     clearAuthToken();
     toast.success("Logged out");
@@ -63,17 +92,26 @@ const Dashboard = () => {
   const handleSaveProject = async () => {
     const token = getAuthToken();
     if (!token) { toast.error("Not authenticated"); return; }
+    if (projectForm.showOnHome && countOthersOnHome(projects, editingId) >= 3) {
+      toast.error(HOME_LIMIT_TOAST);
+      return;
+    }
     setProjectSaving(true);
     try {
+      const techArray = projectTechInput.split(",").map((s) => s.trim()).filter(Boolean);
+      const payload = {
+        title: projectForm.title,
+        description: projectForm.description,
+        tech: techArray,
+        link: projectForm.link,
+        github: projectForm.github,
+        showOnHome: projectForm.showOnHome,
+      };
       if (editingId) {
-        const techArray = projectTechInput.split(",").map((s) => s.trim()).filter(Boolean);
-        const payload = { ...projectForm, tech: techArray };
         const res = await updateProject(editingId, payload, token);
         setProjects(projects.map((p) => (p.id === editingId ? { ...res.data } : p)));
         toast.success("Project updated");
       } else {
-        const techArray = projectTechInput.split(",").map((s) => s.trim()).filter(Boolean);
-        const payload = { ...projectForm, tech: techArray };
         const res = await createProject(payload, token);
         setProjects([...projects, res.data]);
         toast.success("Project added");
@@ -84,6 +122,27 @@ const Dashboard = () => {
       toast.error(msg);
     } finally {
       setProjectSaving(false);
+    }
+  };
+
+  const handleProjectHomeToggle = async (p: Project) => {
+    const token = getAuthToken();
+    if (!token) { toast.error("Not authenticated"); return; }
+    const on = projectShownOnHome(p);
+    const next = !on;
+    if (next && countOthersOnHome(projects, p.id) >= 3) {
+      toast.error(HOME_LIMIT_TOAST);
+      return;
+    }
+    setHomeToggleId(p.id);
+    try {
+      const res = await updateProject(p.id, { showOnHome: next }, token);
+      setProjects(projects.map((x) => (x.id === p.id ? { ...res.data } : x)));
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Failed to update";
+      toast.error(msg);
+    } finally {
+      setHomeToggleId(null);
     }
   };
   const handleSaveService = async () => {
@@ -234,7 +293,13 @@ const Dashboard = () => {
             <Menu className="h-5 w-5" />
           </button>
           <h1 className="text-lg font-semibold text-foreground capitalize">
-            {tab === "analytics" ? "Analytics" : tab === "testimonials" ? "Testimonials" : tab}
+            {tab === "analytics"
+              ? "Analytics"
+              : tab === "testimonials"
+                ? "Testimonials"
+                : tab === "contact-inbox"
+                  ? "Contact messages"
+                  : tab}
           </h1>
           <ThemeToggle className="ml-auto border border-border/60 bg-secondary/30" />
         </header>
@@ -243,7 +308,7 @@ const Dashboard = () => {
           <>
             {tab === "analytics" && <DashboardAnalyticsPanel />}
 
-            {tab !== "analytics" && !showForm && (
+            {tab !== "analytics" && tab !== "contact-inbox" && !showForm && (
               <button
                 type="button"
                 onClick={() => setShowForm(true)}
@@ -264,7 +329,7 @@ const Dashboard = () => {
               </button>
             )}
 
-            {tab !== "analytics" && showForm && (
+            {tab !== "analytics" && tab !== "contact-inbox" && showForm && (
                 <div className="mb-8 p-6 border border-border rounded-lg card-gradient">
                   <div className="flex items-center justify-between mb-4">
                     <h3 className="font-semibold text-foreground">{editingId ? "Edit" : "Add"}</h3>
@@ -280,17 +345,22 @@ const Dashboard = () => {
                         <input value={projectForm.link} onChange={(e) => setProjectForm({ ...projectForm, link: e.target.value })} placeholder="Live URL" className={inputClass} />
                         <input value={projectForm.github} onChange={(e) => setProjectForm({ ...projectForm, github: e.target.value })} placeholder="GitHub URL" className={inputClass} />
                       </div>
-                      <div className="grid grid-cols-2 gap-4">
-                        <div className="flex items-center gap-3">
-                          <label className="text-sm text-foreground">Show on homepage</label>
-                          <button type="button" onClick={() => setProjectForm({ ...projectForm, showOnHome: !projectForm.showOnHome })} className={`relative w-10 h-5 rounded-full transition-colors ${projectForm.showOnHome ? "bg-primary" : "bg-secondary"}`}>
-                            <span className={`absolute top-0.5 left-0.5 w-4 h-4 rounded-full bg-white transition-transform ${projectForm.showOnHome ? "translate-x-5" : ""}`} />
-                          </button>
-                        </div>
-                        <div>
-                          <label className="text-sm text-foreground block mb-1">Display Order</label>
-                          <input type="number" min={1} value={projectForm.displayOrder ?? 1} onChange={(e) => setProjectForm({ ...projectForm, displayOrder: parseInt(e.target.value) || 1 })} className={inputClass} />
-                        </div>
+                      <div className="flex items-center gap-3">
+                        <label className="text-sm text-foreground">Show on home page</label>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const next = !projectForm.showOnHome;
+                            if (next && countOthersOnHome(projects, editingId) >= 3) {
+                              toast.error(HOME_LIMIT_TOAST);
+                              return;
+                            }
+                            setProjectForm({ ...projectForm, showOnHome: next });
+                          }}
+                          className={`relative w-10 h-5 rounded-full transition-colors ${projectForm.showOnHome ? "bg-primary" : "bg-secondary"}`}
+                        >
+                          <span className={`absolute top-0.5 left-0.5 w-4 h-4 rounded-full bg-white transition-transform ${projectForm.showOnHome ? "translate-x-5" : ""}`} />
+                        </button>
                       </div>
                       <button onClick={handleSaveProject} disabled={projectSaving} className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-md text-sm font-medium hover:bg-primary/90 disabled:opacity-60">{projectSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />} {projectSaving ? "Saving…" : "Save"}</button>
                     </div>
@@ -386,6 +456,84 @@ const Dashboard = () => {
             {/* Lists */}
             {tab !== "analytics" && (
             <div className="space-y-4">
+                {tab === "contact-inbox" && (
+                  <div className="flex justify-end mb-2">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const token = getAuthToken();
+                        if (!token) { toast.error("Not authenticated"); return; }
+                        setContactMessagesLoading(true);
+                        fetchContactMessages(token)
+                          .then((res) => setContactMessages(res.data ?? []))
+                          .catch(() => toast.error("Failed to refresh"))
+                          .finally(() => setContactMessagesLoading(false));
+                      }}
+                      disabled={contactMessagesLoading}
+                      className="text-sm text-muted-foreground hover:text-foreground disabled:opacity-50"
+                    >
+                      Refresh
+                    </button>
+                  </div>
+                )}
+
+                {tab === "contact-inbox" && contactMessagesLoading && (
+                  <div className="flex items-center justify-center py-12 text-muted-foreground gap-2">
+                    <Loader2 className="h-5 w-5 animate-spin" />
+                    <span className="text-sm">Loading messages…</span>
+                  </div>
+                )}
+
+                {tab === "contact-inbox" && !contactMessagesLoading && contactMessages.length === 0 && (
+                  <p className="text-sm text-muted-foreground text-center py-10">No messages yet. Submissions from the Contact page will appear here.</p>
+                )}
+
+                {tab === "contact-inbox" && !contactMessagesLoading &&
+                  contactMessages.map((m) => (
+                    <div key={m.id} className="flex gap-4 p-4 border border-border rounded-lg card-gradient text-left">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex flex-wrap items-baseline justify-between gap-2 mb-2">
+                          <div className="flex flex-wrap items-baseline gap-2 min-w-0">
+                            <span className="font-medium text-foreground">{m.name}</span>
+                            <a href={`mailto:${m.email}`} className="text-sm text-primary hover:underline truncate">
+                              {m.email}
+                            </a>
+                          </div>
+                          {m.createdAt && (
+                            <span className="text-xs text-muted-foreground whitespace-nowrap">
+                              {new Date(m.createdAt).toLocaleString()}
+                            </span>
+                          )}
+                        </div>
+                        {m.subject ? <p className="text-sm font-medium text-foreground/90 mb-2">{m.subject}</p> : null}
+                        <p className="text-sm text-muted-foreground whitespace-pre-wrap leading-relaxed">{m.message}</p>
+                      </div>
+                      <button
+                        type="button"
+                        disabled={contactDeletingId === m.id}
+                        onClick={async () => {
+                          const token = getAuthToken();
+                          if (!token) { toast.error("Not authenticated"); return; }
+                          setContactDeletingId(m.id);
+                          try {
+                            await deleteContactMessage(m.id, token);
+                            setContactMessages(contactMessages.filter((x) => x.id !== m.id));
+                            toast.success("Message deleted");
+                          } catch (err: unknown) {
+                            const msg = err instanceof Error ? err.message : "Failed to delete";
+                            toast.error(msg);
+                          } finally {
+                            setContactDeletingId(null);
+                          }
+                        }}
+                        className="p-2 h-fit text-muted-foreground hover:text-destructive transition-colors flex-shrink-0 disabled:opacity-50"
+                        aria-label="Delete message"
+                      >
+                        {contactDeletingId === m.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
+                      </button>
+                    </div>
+                  ))}
+
                 {tab === "projects" && projectsLoading && (
                   <div className="flex items-center justify-center py-12 text-muted-foreground gap-2">
                     <Loader2 className="h-5 w-5 animate-spin" />
@@ -398,17 +546,29 @@ const Dashboard = () => {
                 )}
 
                 {tab === "projects" && !projectsLoading && projects.map((p) => (
-                  <div key={p.id} className="flex items-center justify-between p-4 border border-border rounded-lg card-gradient">
+                  <div key={p.id} className="flex items-center justify-between gap-4 p-4 border border-border rounded-lg card-gradient">
                     <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2">
-                        <h4 className="font-medium text-foreground">{p.title}</h4>
-                        {p.showOnHome && <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-primary/10 text-primary">Homepage</span>}
-                        {p.displayOrder && <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-secondary text-muted-foreground">#{p.displayOrder}</span>}
-                      </div>
+                      <h4 className="font-medium text-foreground">{p.title}</h4>
                       <p className="text-sm text-muted-foreground truncate">{p.description}</p>
                     </div>
-                    <div className="flex gap-2 ml-4 flex-shrink-0">
-                      <button onClick={() => { setProjectForm({ title: p.title, description: p.description, tech: p.tech, link: p.link ?? "", github: p.github ?? "", showOnHome: p.showOnHome ?? true, displayOrder: p.displayOrder ?? 1 }); setProjectTechInput(p.tech.join(", ")); setEditingId(p.id); setShowForm(true); toast("Editing project"); }} className="p-2 text-muted-foreground hover:text-primary transition-colors"><Pencil className="h-4 w-4" /></button>
+                    <div className="flex items-center gap-3 flex-shrink-0">
+                      <span className="text-xs text-muted-foreground whitespace-nowrap hidden sm:inline">Home</span>
+                      <button
+                        type="button"
+                        disabled={homeToggleId === p.id}
+                        onClick={() => void handleProjectHomeToggle(p)}
+                        className={`relative w-10 h-5 rounded-full transition-colors flex-shrink-0 disabled:opacity-50 ${projectShownOnHome(p) ? "bg-primary" : "bg-secondary"}`}
+                        aria-label={projectShownOnHome(p) ? "Remove from home page" : "Show on home page"}
+                      >
+                        {homeToggleId === p.id ? (
+                          <span className="absolute inset-0 flex items-center justify-center">
+                            <Loader2 className="h-3 w-3 animate-spin text-primary-foreground" />
+                          </span>
+                        ) : (
+                          <span className={`absolute top-0.5 left-0.5 w-4 h-4 rounded-full bg-white transition-transform ${projectShownOnHome(p) ? "translate-x-5" : ""}`} />
+                        )}
+                      </button>
+                      <button onClick={() => { setProjectForm({ title: p.title, description: p.description, tech: p.tech, link: p.link ?? "", github: p.github ?? "", showOnHome: projectShownOnHome(p) }); setProjectTechInput(p.tech.join(", ")); setEditingId(p.id); setShowForm(true); toast("Editing project"); }} className="p-2 text-muted-foreground hover:text-primary transition-colors"><Pencil className="h-4 w-4" /></button>
                       <button onClick={async () => {
                         const token = getAuthToken();
                         if (!token) { toast.error("Not authenticated"); return; }

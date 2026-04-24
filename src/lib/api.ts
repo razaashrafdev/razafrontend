@@ -15,16 +15,46 @@ type MeResponse = {
   email: string | null;
 };
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || import.meta.env.BACKEND_URL;
+/** Strip wrapping quotes and trailing slash (common .env mistake). */
+function normalizeApiBase(raw: string | undefined): string {
+  if (raw == null || raw === "") return "";
+  let s = String(raw).trim();
+  if ((s.startsWith('"') && s.endsWith('"')) || (s.startsWith("'") && s.endsWith("'"))) {
+    s = s.slice(1, -1).trim();
+  }
+  return s.replace(/\/$/, "");
+}
+
+/**
+ * In dev, always use same-origin `/api` so Vite proxies to the backend (avoids CORS and bad env URLs).
+ * Proxy target comes from vite.config (defaults to http://127.0.0.1:5000).
+ * In production, set VITE_API_BASE_URL at build time to your API origin (no trailing slash).
+ */
+function resolveApiBaseUrl(): string {
+  if (import.meta.env.DEV) {
+    return "";
+  }
+  return normalizeApiBase(import.meta.env.VITE_API_BASE_URL || import.meta.env.BACKEND_URL);
+}
+
+const API_BASE_URL = resolveApiBaseUrl();
 
 async function apiFetch<T>(path: string, init: RequestInit, token?: string): Promise<T> {
   const headers = new Headers(init.headers);
   if (token) headers.set("Authorization", `Bearer ${token}`);
 
-  const res = await fetch(`${API_BASE_URL}${path}`, {
-    ...init,
-    headers,
-  });
+  const url = `${API_BASE_URL}${path}`;
+  let res: Response;
+  try {
+    res = await fetch(url, {
+      ...init,
+      headers,
+    });
+  } catch {
+    throw new Error(
+      "Cannot reach the server. For local development, run the API on port 5000 and restart Vite after changing vite.config."
+    );
+  }
 
   const data = (await res.json().catch(() => ({}))) as T | ApiErrorResponse;
 
@@ -94,7 +124,6 @@ type ProjectPayload = {
   link?: string;
   github?: string;
   showOnHome?: boolean;
-  displayOrder?: number;
 };
 
 type ProjectData = {
@@ -105,7 +134,6 @@ type ProjectData = {
   link?: string;
   github?: string;
   showOnHome?: boolean;
-  displayOrder?: number;
   createdAt?: string;
   updatedAt?: string;
 };
@@ -283,4 +311,37 @@ export function updateTestimonial(id: string, payload: Partial<TestimonialPayloa
 }
 export function deleteTestimonial(id: string, token: string) {
   return apiFetch<{ success: boolean; message: string }>(`/api/testimonials/remove/${id}`, { method: "DELETE" }, token);
+}
+
+// ── Contact (public submit + authenticated list) ────────────────────────────
+
+export type ContactMessage = {
+  id: string;
+  name: string;
+  email: string;
+  subject?: string;
+  message: string;
+  createdAt?: string;
+};
+
+type ContactSubmitResponse = { success: boolean; data: ContactMessage };
+type ContactListResponse = { success: boolean; data: ContactMessage[] };
+
+export function submitContactMessage(payload: { name: string; email: string; subject?: string; message: string }) {
+  return apiFetch<ContactSubmitResponse>(
+    "/api/contact/submit",
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    }
+  );
+}
+
+export function fetchContactMessages(token: string) {
+  return apiFetch<ContactListResponse>("/api/contact/list", { method: "GET" }, token);
+}
+
+export function deleteContactMessage(id: string, token: string) {
+  return apiFetch<{ success: boolean; message: string }>(`/api/contact/remove/${id}`, { method: "DELETE" }, token);
 }

@@ -49,7 +49,7 @@ const HeroSection = () => {
   }, []);
 
   return (
-    <section className="relative flex w-full min-h-0 nav:min-h-[110vh] items-start nav:items-center overflow-hidden pt-12 pb-6 nav:pt-0 nav:pb-0">
+    <section className="relative flex w-full min-h-0 items-center justify-center overflow-hidden pt-16 pb-8 nav:mt-12 nav:pt-0 nav:pb-16">
       <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[600px] h-[600px] rounded-full bg-primary/5 blur-[120px] pointer-events-none" />
 
       <div className="container mx-auto px-4">
@@ -120,7 +120,7 @@ const HeroSection = () => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.6, delay: 0.5 }}
-            className="flex gap-8 mt-10 mb-6 justify-center nav:mt-16 nav:mb-16"
+            className="flex gap-8 mt-10 mb-6 justify-center"
           >
             {[
               { value: "1+", label: "Years Experience" },
@@ -140,7 +140,7 @@ const HeroSection = () => {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 1 }}
-        className="absolute bottom-4 nav:bottom-8 left-1/2 -translate-x-1/2"
+        className="absolute bottom-4 left-1/2 -translate-x-1/2"
       >
         <ChevronDown className="h-5 w-5 text-muted-foreground animate-bounce" />
       </motion.div>

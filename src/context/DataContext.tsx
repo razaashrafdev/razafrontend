@@ -11,7 +11,8 @@ export interface Project {
   link?: string;
   github?: string;
   showOnHome?: boolean;
-  displayOrder?: number;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface Service {
