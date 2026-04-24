@@ -1,18 +1,33 @@
 import { motion } from "framer-motion";
-import { Mail, MapPin, Phone, Send, Clock, Globe } from "lucide-react";
+import { Mail, MapPin, Phone, Send, Loader2 } from "lucide-react";
 import { useState } from "react";
 import Layout from "@/components/Layout";
 import ContactCTA from "@/components/ContactCTA";
 import SectionBadge from "@/components/SectionBadge";
 import { toast } from "@/components/ui/sonner";
+import { submitContactMessage } from "@/lib/api";
 
 const Contact = () => {
-  const [form, setForm] = useState({ name: "", email: "", subject: "", message: "" });
+  const [form, setForm] = useState({ name: "", email: "", message: "" });
+  const [sending, setSending] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    toast.success("Message sent! (Demo)");
-    setForm({ name: "", email: "", subject: "", message: "" });
+    setSending(true);
+    try {
+      await submitContactMessage({
+        name: form.name.trim(),
+        email: form.email.trim(),
+        message: form.message.trim(),
+      });
+      toast.success("Message sent. I'll get back to you soon.");
+      setForm({ name: "", email: "", message: "" });
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Failed to send message";
+      toast.error(msg);
+    } finally {
+      setSending(false);
+    }
   };
 
   return (
@@ -74,9 +89,11 @@ const Contact = () => {
 
               <button
                 type="submit"
-                className="inline-flex items-center gap-2 px-8 py-4 bg-primary text-primary-foreground font-medium rounded-xl hover:bg-primary/90 transition-colors w-full justify-center text-base active:scale-[0.97]"
+                disabled={sending}
+                className="inline-flex items-center gap-2 px-8 py-4 bg-primary text-primary-foreground font-medium rounded-xl hover:bg-primary/90 transition-colors w-full justify-center text-base active:scale-[0.97] disabled:opacity-60"
               >
-                Send Message <Send className="h-5 w-5" />
+                {sending ? <Loader2 className="h-5 w-5 animate-spin" /> : <Send className="h-5 w-5" />}
+                {sending ? "Sending…" : "Send Message"}
               </button>
             </motion.form>
 
