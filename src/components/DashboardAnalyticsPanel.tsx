@@ -14,8 +14,8 @@ const DashboardAnalyticsPanel = () => {
       try {
         const data = await fetchTrafficStats();
         if (active) setStats(data);
-      } catch (err) {
-        console.error(err);
+      } catch (_err) {
+        // Intentionally silent to keep UI fallback behavior unchanged.
       } finally {
         if (active) setLoading(false);
       }

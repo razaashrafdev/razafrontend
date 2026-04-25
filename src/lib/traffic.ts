@@ -1,4 +1,6 @@
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || import.meta.env.BACKEND_URL || "http://localhost:5000";
+import { resolveApiBaseUrl } from "@/lib/apiBaseUrl";
+
+const API_BASE_URL = resolveApiBaseUrl();
 
 export async function recordPageView(path: string): Promise<void> {
   try {
@@ -7,8 +9,8 @@ export async function recordPageView(path: string): Promise<void> {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ path }),
     });
-  } catch (err) {
-    console.error("Failed to record page view", err);
+  } catch (_err) {
+    // Intentionally silent so visit tracking never breaks page flow.
   }
 }
 

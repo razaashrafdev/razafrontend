@@ -99,32 +99,32 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     fetchProjects()
       .then((res) => setProjects(res.data ?? []))
-      .catch((err) => { console.error("[DataContext] projects:", err?.message || err); setProjects([]); })
+      .catch(() => { setProjects([]); })
       .finally(() => setProjectsLoading(false));
 
     fetchServices()
       .then((res) => setServices(res.data ?? []))
-      .catch((err) => { console.error("[DataContext] services:", err?.message || err); setServices([]); })
+      .catch(() => { setServices([]); })
       .finally(() => setServicesLoading(false));
 
     fetchExperiences()
       .then((res) => setExperiences(res.data ?? []))
-      .catch((err) => { console.error("[DataContext] experiences:", err?.message || err); setExperiences([]); })
+      .catch(() => { setExperiences([]); })
       .finally(() => setExperiencesLoading(false));
 
     fetchPricing()
       .then((res) => setPricing(res.data ?? []))
-      .catch((err) => { console.error("[DataContext] pricing:", err?.message || err); setPricing([]); })
+      .catch(() => { setPricing([]); })
       .finally(() => setPricingLoading(false));
 
     fetchEducation()
       .then((res) => setEducation(res.data ?? []))
-      .catch((err) => { console.error("[DataContext] education:", err?.message || err); setEducation([]); })
+      .catch(() => { setEducation([]); })
       .finally(() => setEducationLoading(false));
 
     fetchTestimonials()
       .then((res) => setTestimonials(res.data ?? []))
-      .catch((err) => { console.error("[DataContext] testimonials:", err?.message || err); setTestimonials([]); })
+      .catch(() => { setTestimonials([]); })
       .finally(() => setTestimonialsLoading(false));
   }, []);
 
