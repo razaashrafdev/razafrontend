@@ -4,11 +4,17 @@ import { handleUnauthorized } from "@/lib/authToken";
 const API_BASE_URL = resolveApiBaseUrl();
 
 export async function recordPageView(path: string): Promise<void> {
+  let normalized = path.trim();
+  if (!normalized.startsWith("/")) normalized = `/${normalized}`;
+  if (normalized.length > 1 && normalized.endsWith("/")) {
+    normalized = normalized.slice(0, -1);
+  }
+
   try {
     await fetch(`${API_BASE_URL}/api/analytics/visit`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ path }),
+      body: JSON.stringify({ path: normalized }),
     });
   } catch (_err) {
     // Intentionally silent so visit tracking never breaks page flow.
