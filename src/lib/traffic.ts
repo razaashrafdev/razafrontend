@@ -1,4 +1,5 @@
 import { resolveApiBaseUrl } from "@/lib/apiBaseUrl";
+import { handleUnauthorized } from "@/lib/authToken";
 
 const API_BASE_URL = resolveApiBaseUrl();
 
@@ -23,8 +24,14 @@ export interface TrafficStats {
   last12Months: { monthKey: string; label: string; count: number }[];
 }
 
-export async function fetchTrafficStats(): Promise<TrafficStats> {
-  const res = await fetch(`${API_BASE_URL}/api/analytics/stats`);
+export async function fetchTrafficStats(token: string): Promise<TrafficStats> {
+  const res = await fetch(`${API_BASE_URL}/api/analytics/stats`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  if (res.status === 401) {
+    handleUnauthorized();
+    throw new Error("Session expired");
+  }
   if (!res.ok) {
     throw new Error(`Failed to fetch traffic stats: ${res.status}`);
   }

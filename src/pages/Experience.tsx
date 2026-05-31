@@ -86,12 +86,9 @@ const ExperiencePage = () => {
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-5xl mx-auto">
             {[
-              { category: "Frontend", skills: ["React", "TypeScript", "Next.js", "Tailwind CSS", "Framer Motion"] },
-              { category: "Backend", skills: ["Node.js", "Python", "Express", "GraphQL", "REST APIs"] },
-              { category: "Database", skills: ["PostgreSQL", "MongoDB", "Redis", "Prisma", "SQL"] },
-              { category: "DevOps", skills: ["Docker", "AWS", "CI/CD", "Kubernetes", "Linux"] },
-              { category: "Tools", skills: ["Git", "VS Code", "Figma", "Jira", "Postman"] },
-              { category: "Soft Skills", skills: ["Communication", "Problem Solving", "Team Leadership", "Agile", "Mentoring"] },
+              { category: "Frontend", skills: ["React", "TypeScript", "Next.js", "Tailwind CSS" ] },
+              { category: "Backend", skills: ["Node.js", "Python", "Express", "REST APIs"] },
+              { category: "Tools", skills: ["Git", "Github", "VS Code", "Figma", "Postman"] },
             ].map((group, i) => (
               <motion.div key={group.category} initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.08, duration: 0.6 }} className="p-6 rounded-lg border border-border card-gradient text-center">
                 <h3 className="font-semibold text-foreground mb-4">{group.category}</h3>

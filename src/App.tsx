@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { DataProvider } from "@/context/DataContext";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import ScrollToTop from "@/components/ScrollToTop";
+import AuthSessionManager from "@/components/AuthSessionManager";
 import VisitTracker from "@/components/VisitTracker";
 import Index from "./pages/Index";
 import Projects from "./pages/Projects";
@@ -25,6 +26,7 @@ const App = () => (
         <Toaster />
         <Sonner />
         <BrowserRouter>
+          <AuthSessionManager />
           <ScrollToTop />
           <VisitTracker />
           <Routes>

@@ -15,11 +15,6 @@ const FeaturedProjects = () => {
   const { projects } = useData();
   const featured = projects
     .filter((p) => p.showOnHome !== false)
-    .sort((a, b) => {
-      const ta = new Date(a.createdAt || a.updatedAt || 0).getTime();
-      const tb = new Date(b.createdAt || b.updatedAt || 0).getTime();
-      return tb - ta;
-    })
     .slice(0, 3);
 
   return (

@@ -39,6 +39,14 @@ const Login = () => {
   const canVerify = useMemo(() => phase === "otp" && otp.trim().length === 6 && !otpLoading, [phase, otp, otpLoading]);
 
   useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("expired") === "1") {
+      toast.error("Your session expired. Please sign in again.");
+      window.history.replaceState({}, "", "/login");
+    }
+  }, []);
+
+  useEffect(() => {
     if (!expiresAt) return;
 
     const interval = window.setInterval(() => {

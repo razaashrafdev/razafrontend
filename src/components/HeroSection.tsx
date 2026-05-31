@@ -3,10 +3,12 @@ import { motion } from "framer-motion";
 import { ArrowRight, Briefcase, ChevronDown } from "lucide-react";
 import { Link } from "react-router-dom";
 import SectionBadge from "./SectionBadge";
+import { useData } from "@/context/DataContext";
 
-const ROTATING_WORDS = ["Web", "Mobile", "API", "Cloud"];
+const ROTATING_WORDS = ["Web App", "Mobile App", "API", "CMS", "WordPress", "Shopify", "E-Commerce"];
 
 const HeroSection = () => {
+  const { siteStats, siteStatsLoading } = useData();
   const [typed, setTyped] = useState("");
 
   useEffect(() => {
@@ -122,16 +124,25 @@ const HeroSection = () => {
             transition={{ duration: 0.6, delay: 0.5 }}
             className="flex gap-8 mt-10 mb-6 justify-center"
           >
-            {[
-              { value: "1+", label: "Years Experience" },
-              { value: "10+", label: "Projects Completed" },
-              { value: "5+", label: "Happy Clients" },
-            ].map((s) => (
-              <div key={s.label} className="text-center">
-                <div className="text-2xl md:text-3xl font-bold text-gradient">{s.value}</div>
-                <div className="text-xs text-muted-foreground font-mono">{s.label}</div>
-              </div>
-            ))}
+            {siteStatsLoading ? (
+              [0, 1, 2].map((i) => (
+                <div key={i} className="text-center space-y-2">
+                  <div className="h-8 w-14 mx-auto rounded bg-secondary/60 animate-pulse" />
+                  <div className="h-3 w-24 mx-auto rounded bg-secondary/40 animate-pulse" />
+                </div>
+              ))
+            ) : siteStats ? (
+              [
+                { value: siteStats.yearsExperience, label: "Years Experience" },
+                { value: siteStats.projectsCompleted, label: "Projects Completed" },
+                { value: siteStats.happyClients, label: "Happy Clients" },
+              ].map((s) => (
+                <div key={s.label} className="text-center">
+                  <div className="text-2xl md:text-3xl font-bold text-gradient">{s.value}</div>
+                  <div className="text-xs text-muted-foreground font-mono">{s.label}</div>
+                </div>
+              ))
+            ) : null}
           </motion.div>
         </div>
       </div>

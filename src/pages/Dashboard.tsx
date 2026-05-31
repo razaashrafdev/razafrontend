@@ -1,14 +1,15 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Plus, Pencil, Trash2, X, Save, FolderKanban, Wrench, Briefcase, LogOut, Menu, DollarSign, GraduationCap, BarChart3, Quote, Loader2, Mail } from "lucide-react";
+import { Plus, Pencil, Trash2, X, Save, FolderKanban, Wrench, Briefcase, LogOut, Menu, DollarSign, GraduationCap, BarChart3, Quote, Loader2, Mail, TrendingUp } from "lucide-react";
 import { useData, Project, Service, Experience, PricingPackage, Education, Testimonial } from "@/context/DataContext";
 import { clearAuthToken, getAuthToken } from "@/lib/authToken";
 import { createProject, updateProject, deleteProject, createService as apiCreateService, updateService as apiUpdateService, deleteService as apiDeleteService, createExperience as apiCreateExp, updateExperience as apiUpdateExp, deleteExperience as apiDeleteExp, createPricing as apiCreatePricing, updatePricing as apiUpdatePricing, deletePricing as apiDeletePricing, createEducation as apiCreateEdu, updateEducation as apiUpdateEdu, deleteEducation as apiDeleteEdu, createTestimonial as apiCreateTest, updateTestimonial as apiUpdateTest, deleteTestimonial as apiDeleteTest, fetchContactMessages, deleteContactMessage, type ContactMessage } from "@/lib/api";
 import { toast } from "@/components/ui/sonner";
 import ThemeToggle from "@/components/ThemeToggle";
 import DashboardAnalyticsPanel from "@/components/DashboardAnalyticsPanel";
+import DashboardStatsPanel from "@/components/DashboardStatsPanel";
 
-type Tab = "projects" | "services" | "experience" | "pricing" | "education" | "testimonials" | "contact-inbox" | "analytics";
+type Tab = "projects" | "services" | "experience" | "pricing" | "education" | "testimonials" | "contact-inbox" | "analytics" | "stats";
 
 const HOME_LIMIT_TOAST = "first remove one project from home to show this project in home page";
 
@@ -28,6 +29,7 @@ const sidebarItems: { key: Tab; label: string; icon: React.ElementType }[] = [
   { key: "education", label: "Education", icon: GraduationCap },
   { key: "testimonials", label: "Testimonials", icon: Quote },
   { key: "contact-inbox", label: "Messages", icon: Mail },
+  { key: "stats", label: "Statistics", icon: TrendingUp },
   { key: "analytics", label: "Analytics", icon: BarChart3 },
 ];
 
@@ -40,6 +42,8 @@ const Dashboard = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [projectSaving, setProjectSaving] = useState(false);
   const [projectTechInput, setProjectTechInput] = useState("");
+  const [expTechInput, setExpTechInput] = useState("");
+  const [pricingFeaturesInput, setPricingFeaturesInput] = useState("");
   const [serviceSaving, setServiceSaving] = useState(false);
   const [expSaving, setExpSaving] = useState(false);
   const [pricingSaving, setPricingSaving] = useState(false);
@@ -60,6 +64,8 @@ const Dashboard = () => {
   const resetForms = () => {
     setProjectForm({ title: "", description: "", tech: [], link: "", github: "", showOnHome: false });
     setProjectTechInput("");
+    setExpTechInput("");
+    setPricingFeaturesInput("");
     setServiceForm({ title: "", description: "", icon: "Code" });
     setExpForm({ role: "", company: "", period: "", description: "", tech: [] });
     setPricingForm({ name: "", price: 0, description: "", features: [], featured: false, visible: true });
@@ -99,7 +105,7 @@ const Dashboard = () => {
     setProjectSaving(true);
     try {
       const techArray = projectTechInput.split(",").map((s) => s.trim()).filter(Boolean);
-      const payload = {
+      const payload: Parameters<typeof createProject>[0] = {
         title: projectForm.title,
         description: projectForm.description,
         tech: techArray,
@@ -108,12 +114,19 @@ const Dashboard = () => {
         showOnHome: projectForm.showOnHome,
       };
       if (editingId) {
+        if (projectForm.position != null) {
+          payload.position = projectForm.position;
+        }
         const res = await updateProject(editingId, payload, token);
-        setProjects(projects.map((p) => (p.id === editingId ? { ...res.data } : p)));
+        if (res.projects) {
+          setProjects(res.projects);
+        } else {
+          setProjects(projects.map((p) => (p.id === editingId ? { ...res.data } : p)));
+        }
         toast.success("Project updated");
       } else {
         const res = await createProject(payload, token);
-        setProjects([...projects, res.data]);
+        setProjects(res.projects ?? [res.data, ...projects]);
         toast.success("Project added");
       }
       resetForms();
@@ -156,7 +169,7 @@ const Dashboard = () => {
         toast.success("Service updated");
       } else {
         const res = await apiCreateService(serviceForm, token);
-        setServices([...services, res.data]);
+        setServices([res.data, ...services]);
         toast.success("Service added");
       }
       resetForms();
@@ -172,13 +185,17 @@ const Dashboard = () => {
     if (!token) { toast.error("Not authenticated"); return; }
     setExpSaving(true);
     try {
+      const payload = {
+        ...expForm,
+        tech: expTechInput.split(",").map((s) => s.trim()).filter(Boolean),
+      };
       if (editingId) {
-        const res = await apiUpdateExp(editingId, expForm, token);
+        const res = await apiUpdateExp(editingId, payload, token);
         setExperiences(experiences.map((e) => (e.id === editingId ? { ...res.data } : e)));
         toast.success("Experience updated");
       } else {
-        const res = await apiCreateExp(expForm, token);
-        setExperiences([...experiences, res.data]);
+        const res = await apiCreateExp(payload, token);
+        setExperiences([res.data, ...experiences]);
         toast.success("Experience added");
       }
       resetForms();
@@ -194,13 +211,17 @@ const Dashboard = () => {
     if (!token) { toast.error("Not authenticated"); return; }
     setPricingSaving(true);
     try {
+      const payload = {
+        ...pricingForm,
+        features: pricingFeaturesInput.split(",").map((s) => s.trim()).filter(Boolean),
+      };
       if (editingId) {
-        const res = await apiUpdatePricing(editingId, pricingForm, token);
+        const res = await apiUpdatePricing(editingId, payload, token);
         setPricing(pricing.map((p) => (p.id === editingId ? { ...res.data } : p)));
         toast.success("Package updated");
       } else {
-        const res = await apiCreatePricing(pricingForm, token);
-        setPricing([...pricing, res.data]);
+        const res = await apiCreatePricing(payload, token);
+        setPricing([res.data, ...pricing]);
         toast.success("Package added");
       }
       resetForms();
@@ -222,7 +243,7 @@ const Dashboard = () => {
         toast.success("Education updated");
       } else {
         const res = await apiCreateEdu(eduForm, token);
-        setEducation([...education, res.data]);
+        setEducation([res.data, ...education]);
         toast.success("Education added");
       }
       resetForms();
@@ -244,7 +265,7 @@ const Dashboard = () => {
         toast.success("Testimonial updated");
       } else {
         const res = await apiCreateTest(testimonialForm, token);
-        setTestimonials([...testimonials, res.data]);
+        setTestimonials([res.data, ...testimonials]);
         toast.success("Testimonial added");
       }
       resetForms();
@@ -295,7 +316,9 @@ const Dashboard = () => {
           <h1 className="text-lg font-semibold text-foreground capitalize">
             {tab === "analytics"
               ? "Analytics"
-              : tab === "testimonials"
+              : tab === "stats"
+                ? "Statistics"
+                : tab === "testimonials"
                 ? "Testimonials"
                 : tab === "contact-inbox"
                   ? "Contact messages"
@@ -308,7 +331,9 @@ const Dashboard = () => {
           <>
             {tab === "analytics" && <DashboardAnalyticsPanel />}
 
-            {tab !== "analytics" && tab !== "contact-inbox" && !showForm && (
+            {tab === "stats" && <DashboardStatsPanel />}
+
+            {tab !== "analytics" && tab !== "stats" && tab !== "contact-inbox" && !showForm && (
               <button
                 type="button"
                 onClick={() => setShowForm(true)}
@@ -329,7 +354,7 @@ const Dashboard = () => {
               </button>
             )}
 
-            {tab !== "analytics" && tab !== "contact-inbox" && showForm && (
+            {tab !== "analytics" && tab !== "stats" && tab !== "contact-inbox" && showForm && (
                 <div className="mb-8 p-6 border border-border rounded-lg card-gradient">
                   <div className="flex items-center justify-between mb-4">
                     <h3 className="font-semibold text-foreground">{editingId ? "Edit" : "Add"}</h3>
@@ -362,6 +387,28 @@ const Dashboard = () => {
                           <span className={`absolute top-0.5 left-0.5 w-4 h-4 rounded-full bg-white transition-transform ${projectForm.showOnHome ? "translate-x-5" : ""}`} />
                         </button>
                       </div>
+                      {editingId && (
+                        <div>
+                          <label className="text-sm text-foreground block mb-1">Display position</label>
+                          <input
+                            type="number"
+                            min={1}
+                            max={projects.length}
+                            value={projectForm.position ?? 1}
+                            onChange={(e) => {
+                              const next = parseInt(e.target.value, 10);
+                              setProjectForm({
+                                ...projectForm,
+                                position: Number.isFinite(next) ? Math.min(Math.max(next, 1), projects.length) : 1,
+                              });
+                            }}
+                            className={inputClass}
+                          />
+                          <p className="text-xs text-muted-foreground mt-1">
+                            1 = first. Changing position shifts other projects automatically.
+                          </p>
+                        </div>
+                      )}
                       <button onClick={handleSaveProject} disabled={projectSaving} className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-md text-sm font-medium hover:bg-primary/90 disabled:opacity-60">{projectSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />} {projectSaving ? "Saving…" : "Save"}</button>
                     </div>
                   )}
@@ -387,7 +434,7 @@ const Dashboard = () => {
                       <input value={expForm.company} onChange={(e) => setExpForm({ ...expForm, company: e.target.value })} placeholder="Company" className={inputClass} />
                       <input value={expForm.period} onChange={(e) => setExpForm({ ...expForm, period: e.target.value })} placeholder="Period (e.g. 2022 — Present)" className={inputClass} />
                       <textarea value={expForm.description} onChange={(e) => setExpForm({ ...expForm, description: e.target.value })} placeholder="Description" rows={3} className={`${inputClass} resize-none`} />
-                      <input value={expForm.tech.join(", ")} onChange={(e) => setExpForm({ ...expForm, tech: e.target.value.split(",").map((s) => s.trim()).filter(Boolean) })} placeholder="Tech used (comma separated)" className={inputClass} />
+                      <input value={expTechInput} onChange={(e) => setExpTechInput(e.target.value)} placeholder="Tech used (comma separated, e.g. React, Node.js)" className={inputClass} />
                       <button onClick={handleSaveExperience} disabled={expSaving} className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-md text-sm font-medium hover:bg-primary/90 disabled:opacity-60">{expSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />} {expSaving ? "Saving…" : "Save"}</button>
                     </div>
                   )}
@@ -397,7 +444,7 @@ const Dashboard = () => {
                       <input value={pricingForm.name} onChange={(e) => setPricingForm({ ...pricingForm, name: e.target.value })} placeholder="Package name" className={inputClass} />
                       <input type="number" value={pricingForm.price} onChange={(e) => setPricingForm({ ...pricingForm, price: parseInt(e.target.value) || 0 })} placeholder="Price" className={inputClass} />
                       <textarea value={pricingForm.description} onChange={(e) => setPricingForm({ ...pricingForm, description: e.target.value })} placeholder="Description" rows={2} className={`${inputClass} resize-none`} />
-                      <input value={pricingForm.features.join(", ")} onChange={(e) => setPricingForm({ ...pricingForm, features: e.target.value.split(",").map((s) => s.trim()).filter(Boolean) })} placeholder="Features (comma separated)" className={inputClass} />
+                      <input value={pricingFeaturesInput} onChange={(e) => setPricingFeaturesInput(e.target.value)} placeholder="Features (comma separated, e.g. Custom design, SEO setup)" className={inputClass} />
                       <div className="flex items-center gap-6">
                         <div className="flex items-center gap-3">
                           <label className="text-sm text-foreground">Featured</label>
@@ -454,7 +501,7 @@ const Dashboard = () => {
             )}
 
             {/* Lists */}
-            {tab !== "analytics" && (
+            {tab !== "analytics" && tab !== "stats" && (
             <div className="space-y-4">
                 {tab === "contact-inbox" && (
                   <div className="flex justify-end mb-2">
@@ -548,7 +595,10 @@ const Dashboard = () => {
                 {tab === "projects" && !projectsLoading && projects.map((p) => (
                   <div key={p.id} className="flex items-center justify-between gap-4 p-4 border border-border rounded-lg card-gradient">
                     <div className="flex-1 min-w-0">
-                      <h4 className="font-medium text-foreground">{p.title}</h4>
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-mono text-muted-foreground shrink-0">#{p.position ?? projects.indexOf(p) + 1}</span>
+                        <h4 className="font-medium text-foreground">{p.title}</h4>
+                      </div>
                       <p className="text-sm text-muted-foreground truncate">{p.description}</p>
                     </div>
                     <div className="flex items-center gap-3 flex-shrink-0">
@@ -568,13 +618,13 @@ const Dashboard = () => {
                           <span className={`absolute top-0.5 left-0.5 w-4 h-4 rounded-full bg-white transition-transform ${projectShownOnHome(p) ? "translate-x-5" : ""}`} />
                         )}
                       </button>
-                      <button onClick={() => { setProjectForm({ title: p.title, description: p.description, tech: p.tech, link: p.link ?? "", github: p.github ?? "", showOnHome: projectShownOnHome(p) }); setProjectTechInput(p.tech.join(", ")); setEditingId(p.id); setShowForm(true); toast("Editing project"); }} className="p-2 text-muted-foreground hover:text-primary transition-colors"><Pencil className="h-4 w-4" /></button>
+                      <button onClick={() => { setProjectForm({ title: p.title, description: p.description, tech: p.tech, link: p.link ?? "", github: p.github ?? "", showOnHome: projectShownOnHome(p), position: p.position ?? projects.indexOf(p) + 1 }); setProjectTechInput(p.tech.join(", ")); setEditingId(p.id); setShowForm(true); toast("Editing project"); }} className="p-2 text-muted-foreground hover:text-primary transition-colors"><Pencil className="h-4 w-4" /></button>
                       <button onClick={async () => {
                         const token = getAuthToken();
                         if (!token) { toast.error("Not authenticated"); return; }
                         try {
-                          await deleteProject(p.id, token);
-                          setProjects(projects.filter((x) => x.id !== p.id));
+                          const res = await deleteProject(p.id, token);
+                          setProjects(res.projects ?? projects.filter((x) => x.id !== p.id));
                           toast.success("Project deleted");
                         } catch (err: unknown) {
                           const msg = err instanceof Error ? err.message : "Failed to delete";
@@ -633,7 +683,7 @@ const Dashboard = () => {
                       <p className="text-sm text-primary/80">{e.company} · {e.period}</p>
                     </div>
                     <div className="flex gap-2 ml-4">
-                      <button onClick={() => { setExpForm({ role: e.role, company: e.company, period: e.period, description: e.description, tech: e.tech }); setEditingId(e.id); setShowForm(true); toast("Editing experience"); }} className="p-2 text-muted-foreground hover:text-primary transition-colors"><Pencil className="h-4 w-4" /></button>
+                      <button onClick={() => { setExpForm({ role: e.role, company: e.company, period: e.period, description: e.description, tech: e.tech }); setExpTechInput(e.tech.join(", ")); setEditingId(e.id); setShowForm(true); toast("Editing experience"); }} className="p-2 text-muted-foreground hover:text-primary transition-colors"><Pencil className="h-4 w-4" /></button>
                       <button onClick={async () => {
                         const token = getAuthToken();
                         if (!token) { toast.error("Not authenticated"); return; }
@@ -668,7 +718,7 @@ const Dashboard = () => {
                       <p className="text-sm text-muted-foreground truncate">{p.description}</p>
                     </div>
                     <div className="flex gap-2 ml-4 flex-shrink-0">
-                      <button onClick={() => { setPricingForm({ name: p.name, price: p.price, description: p.description, features: p.features, featured: p.featured, visible: p.visible }); setEditingId(p.id); setShowForm(true); toast("Editing package"); }} className="p-2 text-muted-foreground hover:text-primary transition-colors"><Pencil className="h-4 w-4" /></button>
+                      <button onClick={() => { setPricingForm({ name: p.name, price: p.price, description: p.description, features: p.features, featured: p.featured, visible: p.visible }); setPricingFeaturesInput(p.features.join(", ")); setEditingId(p.id); setShowForm(true); toast("Editing package"); }} className="p-2 text-muted-foreground hover:text-primary transition-colors"><Pencil className="h-4 w-4" /></button>
                       <button onClick={async () => {
                         const token = getAuthToken();
                         if (!token) { toast.error("Not authenticated"); return; }
