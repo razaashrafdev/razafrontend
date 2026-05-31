@@ -1,5 +1,6 @@
 type ApiErrorResponse = { error?: string };
 import { resolveApiBaseUrl } from "@/lib/apiBaseUrl";
+import { handleUnauthorized } from "@/lib/authToken";
 
 type LoginResponse = {
   token: string;
@@ -38,6 +39,9 @@ async function apiFetch<T>(path: string, init: RequestInit, token?: string): Pro
   const data = (await res.json().catch(() => ({}))) as T | ApiErrorResponse;
 
   if (!res.ok) {
+    if (res.status === 401 && token) {
+      handleUnauthorized();
+    }
     const err = data as ApiErrorResponse;
     throw new Error(err.error || `Request failed (${res.status})`);
   }
@@ -103,6 +107,7 @@ type ProjectPayload = {
   link?: string;
   github?: string;
   showOnHome?: boolean;
+  position?: number;
 };
 
 type ProjectData = {
@@ -113,11 +118,12 @@ type ProjectData = {
   link?: string;
   github?: string;
   showOnHome?: boolean;
+  position?: number;
   createdAt?: string;
   updatedAt?: string;
 };
 
-type ProjectResponse = { success: boolean; data: ProjectData };
+type ProjectResponse = { success: boolean; data: ProjectData; projects?: ProjectData[] };
 type ProjectsListResponse = { success: boolean; data: ProjectData[] };
 
 export function fetchProjects() {
@@ -149,7 +155,7 @@ export function updateProject(id: string, payload: Partial<ProjectPayload>, toke
 }
 
 export function deleteProject(id: string, token: string) {
-  return apiFetch<{ success: boolean; message: string }>(
+  return apiFetch<{ success: boolean; message: string; projects?: ProjectData[] }>(
     `/api/projects/remove/${id}`,
     { method: "DELETE" },
     token
@@ -323,4 +329,31 @@ export function fetchContactMessages(token: string) {
 
 export function deleteContactMessage(id: string, token: string) {
   return apiFetch<{ success: boolean; message: string }>(`/api/contact/remove/${id}`, { method: "DELETE" }, token);
+}
+
+// ── Site statistics (hero section) ───────────────────────────────────────────
+
+export type SiteStats = {
+  yearsExperience: string;
+  projectsCompleted: string;
+  happyClients: string;
+  updatedAt?: string;
+};
+
+type SiteStatsResponse = { success: boolean; data: SiteStats };
+
+export function fetchSiteStats() {
+  return apiFetch<SiteStatsResponse>("/api/stats", { method: "GET" });
+}
+
+export function updateSiteStats(payload: SiteStats, token: string) {
+  return apiFetch<SiteStatsResponse>(
+    "/api/stats",
+    {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    },
+    token
+  );
 }

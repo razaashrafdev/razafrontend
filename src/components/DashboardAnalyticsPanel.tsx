@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { BarChart3, Eye, CalendarDays, Globe, RefreshCw, Loader2 } from "lucide-react";
 import { fetchTrafficStats, TrafficStats } from "@/lib/traffic";
+import { getAuthToken } from "@/lib/authToken";
 
 const DashboardAnalyticsPanel = () => {
   const [tick, setTick] = useState(0);
@@ -10,9 +11,15 @@ const DashboardAnalyticsPanel = () => {
   useEffect(() => {
     let active = true;
     const loadStats = async () => {
+      const token = getAuthToken();
+      if (!token) {
+        if (active) setLoading(false);
+        return;
+      }
+
       setLoading(true);
       try {
-        const data = await fetchTrafficStats();
+        const data = await fetchTrafficStats(token);
         if (active) setStats(data);
       } catch (_err) {
         // Intentionally silent to keep UI fallback behavior unchanged.

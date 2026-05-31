@@ -1,6 +1,6 @@
 /* eslint-disable react-refresh/only-export-components */
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
-import { fetchProjects, fetchServices, fetchExperiences, fetchPricing, fetchEducation, fetchTestimonials } from "@/lib/api";
+import { fetchProjects, fetchServices, fetchExperiences, fetchPricing, fetchEducation, fetchTestimonials, fetchSiteStats, type SiteStats } from "@/lib/api";
 
 export interface Project {
   id: string;
@@ -11,6 +11,7 @@ export interface Project {
   link?: string;
   github?: string;
   showOnHome?: boolean;
+  position?: number;
   createdAt?: string;
   updatedAt?: string;
 }
@@ -59,6 +60,8 @@ export interface Testimonial {
   visible?: boolean;
 }
 
+export type { SiteStats };
+
 interface DataContextType {
   projects: Project[];
   setProjects: (p: Project[]) => void;
@@ -78,6 +81,9 @@ interface DataContextType {
   testimonials: Testimonial[];
   setTestimonials: (t: Testimonial[]) => void;
   testimonialsLoading: boolean;
+  siteStats: SiteStats | null;
+  setSiteStats: (s: SiteStats | null) => void;
+  siteStatsLoading: boolean;
 }
 
 const DataContext = createContext<DataContextType | null>(null);
@@ -95,6 +101,8 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
   const [educationLoading, setEducationLoading] = useState(true);
   const [testimonials, setTestimonials] = useState<Testimonial[]>([]);
   const [testimonialsLoading, setTestimonialsLoading] = useState(true);
+  const [siteStats, setSiteStats] = useState<SiteStats | null>(null);
+  const [siteStatsLoading, setSiteStatsLoading] = useState(true);
 
   useEffect(() => {
     fetchProjects()
@@ -126,6 +134,11 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
       .then((res) => setTestimonials(res.data ?? []))
       .catch(() => { setTestimonials([]); })
       .finally(() => setTestimonialsLoading(false));
+
+    fetchSiteStats()
+      .then((res) => setSiteStats(res.data ?? null))
+      .catch(() => { setSiteStats(null); })
+      .finally(() => setSiteStatsLoading(false));
   }, []);
 
   return (
@@ -136,6 +149,7 @@ export const DataProvider = ({ children }: { children: ReactNode }) => {
       pricing, setPricing, pricingLoading,
       education, setEducation, educationLoading,
       testimonials, setTestimonials, testimonialsLoading,
+      siteStats, setSiteStats, siteStatsLoading,
     }}>
       {children}
     </DataContext.Provider>
