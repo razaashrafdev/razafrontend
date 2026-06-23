@@ -28,7 +28,7 @@ const FloatingButtons = () => {
         )}
       </AnimatePresence>
       <a
-        href="https://wa.me/15551234567"
+        href="https://wa.me/923092438145"
         target="_blank"
         rel="noopener noreferrer"
         className="p-3 rounded-full bg-[hsl(142,70%,45%)] text-white hover:bg-[hsl(142,70%,40%)] transition-colors shadow-lg"
