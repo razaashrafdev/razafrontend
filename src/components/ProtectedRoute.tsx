@@ -3,18 +3,23 @@ import { Navigate } from "react-router-dom";
 import type { ReactNode } from "react";
 
 import { fetchMe } from "@/lib/api";
-import { getAuthToken, clearAuthToken } from "@/lib/authToken";
+import { readAuthToken, clearAuthToken, isTokenExpired, logoutDueToExpiry } from "@/lib/authToken";
 
 const ProtectedRoute = ({ children }: { children: ReactNode }) => {
   const [loading, setLoading] = useState(true);
   const [authenticated, setAuthenticated] = useState(false);
 
   useEffect(() => {
-    const token = getAuthToken();
+    const token = readAuthToken();
 
     if (!token) {
       setAuthenticated(false);
       setLoading(false);
+      return;
+    }
+
+    if (isTokenExpired(token)) {
+      logoutDueToExpiry();
       return;
     }
 

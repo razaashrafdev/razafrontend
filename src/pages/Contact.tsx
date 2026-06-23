@@ -1,18 +1,34 @@
 import { motion } from "framer-motion";
-import { Mail, MapPin, Phone, Send, Clock, Globe } from "lucide-react";
+import { Mail, MapPin, Phone, Send, Loader2 } from "lucide-react";
 import { useState } from "react";
 import Layout from "@/components/Layout";
 import ContactCTA from "@/components/ContactCTA";
 import SectionBadge from "@/components/SectionBadge";
 import { toast } from "@/components/ui/sonner";
+import { submitContactMessage } from "@/lib/api";
 
 const Contact = () => {
-  const [form, setForm] = useState({ name: "", email: "", subject: "", message: "" });
+  const [form, setForm] = useState({ name: "", email: "", message: "", website: "" });
+  const [sending, setSending] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    toast.success("Message sent! (Demo)");
-    setForm({ name: "", email: "", subject: "", message: "" });
+    setSending(true);
+    try {
+      await submitContactMessage({
+        name: form.name.trim(),
+        email: form.email.trim(),
+        message: form.message.trim(),
+        website: form.website.trim(),
+      });
+      toast.success("Message sent. I'll get back to you soon.");
+      setForm({ name: "", email: "", message: "", website: "" });
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Failed to send message";
+      toast.error(msg);
+    } finally {
+      setSending(false);
+    }
   };
 
   return (
@@ -42,6 +58,8 @@ const Contact = () => {
                     type="text"
                     value={form.name}
                     onChange={(e) => setForm({ ...form, name: e.target.value })}
+                    minLength={2}
+                    maxLength={30}
                     className="w-full px-5 py-4 bg-background border border-border rounded-xl text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-colors text-sm"
                     placeholder="John Doe"
                     required
@@ -65,6 +83,8 @@ const Contact = () => {
                 <textarea
                   value={form.message}
                   onChange={(e) => setForm({ ...form, message: e.target.value })}
+                  minLength={10}
+                  maxLength={1000}
                   rows={6}
                   className="w-full px-5 py-4 bg-background border border-border rounded-xl text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-colors resize-none text-sm"
                   placeholder="Tell me about your project, goals, and timeline..."
@@ -72,11 +92,26 @@ const Contact = () => {
                 />
               </div>
 
+              <div className="hidden" aria-hidden="true">
+                <label htmlFor="website">Website</label>
+                <input
+                  id="website"
+                  name="website"
+                  type="text"
+                  tabIndex={-1}
+                  autoComplete="off"
+                  value={form.website}
+                  onChange={(e) => setForm({ ...form, website: e.target.value })}
+                />
+              </div>
+
               <button
                 type="submit"
-                className="inline-flex items-center gap-2 px-8 py-4 bg-primary text-primary-foreground font-medium rounded-xl hover:bg-primary/90 transition-colors w-full justify-center text-base active:scale-[0.97]"
+                disabled={sending}
+                className="inline-flex items-center gap-2 px-8 py-4 bg-primary text-primary-foreground font-medium rounded-xl hover:bg-primary/90 transition-colors w-full justify-center text-base active:scale-[0.97] disabled:opacity-60"
               >
-                Send Message <Send className="h-5 w-5" />
+                {sending ? <Loader2 className="h-5 w-5 animate-spin" /> : <Send className="h-5 w-5" />}
+                {sending ? "Sending…" : "Send Message"}
               </button>
             </motion.form>
 

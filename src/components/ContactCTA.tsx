@@ -22,7 +22,7 @@ const ContactCTA = () => (
         </p>
         <Link
           to="/contact"
-          className="inline-flex items-center gap-2 px-8 py-4 bg-primary text-primary-foreground font-medium rounded-md hover:bg-primary/90 transition-colors text-lg active:scale-[0.97]"
+          className="inline-flex items-center gap-2 px-8 py-4 bg-primary text-primary-foreground font-medium rounded-xl hover:bg-primary/90 transition-colors text-lg active:scale-[0.97]"
         >
           Get in Touch <ArrowRight className="h-5 w-5" />
         </Link>

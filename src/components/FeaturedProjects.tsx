@@ -14,8 +14,7 @@ const fadeUp = {
 const FeaturedProjects = () => {
   const { projects } = useData();
   const featured = projects
-    .filter(p => p.showOnHome !== false)
-    .sort((a, b) => (a.displayOrder ?? 99) - (b.displayOrder ?? 99))
+    .filter((p) => p.showOnHome !== false)
     .slice(0, 3);
 
   return (
@@ -42,12 +41,12 @@ const FeaturedProjects = () => {
                 </div>
                 <div className="flex gap-2">
                   {project.github && (
-                    <a href={project.github} className="text-muted-foreground hover:text-primary transition-colors">
+                    <a href={project.github} target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-primary transition-colors">
                       <Github className="h-4 w-4" />
                     </a>
                   )}
                   {project.link && (
-                    <a href={project.link} className="text-muted-foreground hover:text-primary transition-colors">
+                    <a href={project.link} target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-primary transition-colors">
                       <ExternalLink className="h-4 w-4" />
                     </a>
                   )}
